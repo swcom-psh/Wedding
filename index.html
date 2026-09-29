@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>박상현 ♥ 이가경 결혼합니다</title>
+<meta property="og:title" content="박상현 ♥ 이가경 결혼합니다">
+<meta property="og:description" content="2027년 2월 13일 토요일 낮 12시 10분">
+<meta property="og:image" content="img/cover.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nothing+You+Could+Do&family=Reenie+Beanie&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+
+  <button id="bgm-btn" class="bgm" aria-label="배경음악 켜기/끄기" hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path class="x" d="M16 9l5 6m0-6l-5 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+  </button>
+  <audio id="bgm" src="" loop preload="none"></audio>
+
+  <!-- 1. 인트로 -->
+  <section class="intro" id="intro">
+    <img src="img/cover.jpg" alt="박상현 이가경 결혼합니다">
+  </section>
+
+  <!-- 2. Our Wedding day -->
+  <section class="sec wine day" id="day">
+    <h2 class="script big reveal">Our Wedding day</h2>
+    <div class="date-card reveal"><img src="img/card-date.png" alt="2027년 2월 13일 토요일 오후 12시 10분 원주 빌라드아모르 씨엘 웨딩홀"></div>
+
+    <p class="parents reveal">
+      <span>박금용 · 손선미<em>의 아들</em> <b>상현</b></span>
+      <span>이종봉 · 문태숙<em>의 딸</em> <b>가경</b></span>
+    </p>
+
+    <div class="locket reveal"><img src="img/locket.png" alt="신랑신부 로켓 목걸이"></div>
+
+    <div class="tapes reveal">
+      <img src="img/tape.png" alt="">
+      <p style="top:13.4%">서로를 만나 웃게 되었고,</p>
+      <p style="top:30%">함께 걷다 보니</p>
+      <p style="top:47.7%">어느새 서로의 편안한 곳이 되었고,</p>
+      <p style="top:65%">그 마음을 오래 지키기 위해</p>
+      <p style="top:82.4%">이제 부부가 되려 합니다.</p>
+    </div>
+    <p class="msg reveal">
+      서로의 안식처가 되어주기로 했습니다.<br><br>
+      그 약속이 영원이 되는 날,<br>저희의 증인이 되어주세요.
+    </p>
+    <div class="wide-photo reveal"><img src="img/ace_1690.jpg" alt="" style="object-position:50% 62%"></div>
+  </section>
+
+  <!-- 3. Gallery -->
+  <section class="sec wine gallery" id="gallery">
+    <span class="heart-mini">♥</span>
+    <h2 class="script big reveal">Gallery</h2>
+    <p class="sub reveal">우리의 순간</p>
+    <div class="cream-board reveal">
+      <div class="stamps" id="stamps"></div>
+    </div>
+  </section>
+
+  <!-- 4. Save the date -->
+  <section class="sec paper" id="date">
+    <h2 class="script big dark reveal">Save the Date</h2>
+    <p class="sub dark reveal">예식 안내</p>
+    <div class="cal reveal" id="cal"></div>
+    <p class="date-line reveal">2027년 2월 13일(토) 오후 12시 10분</p>
+    <div class="count reveal" id="count">
+      <div><b id="cd-d">00</b><small>Days</small></div><i>:</i>
+      <div><b id="cd-h">00</b><small>Hours</small></div><i>:</i>
+      <div><b id="cd-m">00</b><small>Min</small></div><i>:</i>
+      <div><b id="cd-s">00</b><small>Sec</small></div>
+    </div>
+    <p class="dday reveal" id="dday"></p>
+  </section>
+
+  <!-- 5. Location -->
+  <section class="sec paper loc" id="loc">
+    <h2 class="script big dark reveal">Location</h2>
+    <p class="sub dark reveal">오시는 길</p>
+    <p class="hall reveal">원주 빌라드아모르 씨엘 웨딩홀</p>
+    <p class="haddr reveal"><span id="addr-text">강원 원주시 북원로 2888</span>
+      <button class="copy" id="addr-copy" aria-label="주소 복사" data-copy="강원 원주시 북원로 2888">복사</button></p>
+    <div class="map reveal" id="map">
+      <iframe title="예식장 지도" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://maps.google.com/maps?q=%EC%9B%90%EC%A3%BC%20%EB%B9%8C%EB%9D%BC%EB%93%9C%EC%95%84%EB%AA%A8%EB%A5%B4&hl=ko&z=16&output=embed"></iframe>
+      <a class="kakao-chip" id="lk-kakao" target="_blank" rel="noopener"><svg viewBox="0 0 14 16"><path d="M7 0C3.4 0 .5 2.8.5 6.3c0 4.3 5.1 9.2 6.2 9.6.2.1.4.1.6 0C8.400 15.500 13.500 10.600 13.500 6.300 13.500 2.800 10.600 0 7 0z" fill="#fee500"/><circle cx="7" cy="6.2" r="2.4" fill="#3c3c3c"/></svg>카카오맵 열기</a>
+    </div>
+    <div class="map-btns reveal">
+      <a id="lk-naver" target="_blank" rel="noopener"><i class="ic n">N</i>네이버</a>
+      <a id="lk-tmap" target="_blank" rel="noopener"><i class="ic t">T</i>T MAP</a>
+      <a id="lk-google" target="_blank" rel="noopener"><i class="ic g">●</i>구글맵</a>
+    </div>
+
+    <div class="how reveal">
+      <h3><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 15v-4l2-5h12l2 5v4M4 15h16M4 15v3h3v-3M17 15v3h3v-3"/><circle cx="8" cy="13" r=".8"/><circle cx="16" cy="13" r=".8"/></svg>자차</h3>
+      <p><b>네비게이션 : "원주 빌라드아모르" 검색</b><br>주소 검색 : "강원 원주시 북원로 2888" 입력</p>
+      <p>*영동고속도로 이용시<br>원주 IC에서 횡성 방향(좌회전)으로 빠져서 30m 정도 가면 오른쪽에 위치</p>
+    </div>
+    <div class="how reveal">
+      <h3><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="13" rx="2"/><path d="M4 11h16M7 20v-3M17 20v-3"/><circle cx="8" cy="14" r=".8"/><circle cx="16" cy="14" r=".8"/></svg>버스</h3>
+      <p>*시외/고속버스터미널 하차 후<br><b>3번, 3-1번, 4번, 4-1번, 31번, 32번, 33번, 34번</b> 승차 후 장양초등학교 하차</p>
+      <p>*원주역 하차 후<br><b>30번, 90번</b> 승차 후 장양초등학교 하차<br>(18번, 19번 이용 시 시외버스터미널에서 환승)</p>
+    </div>
+    <div class="how reveal">
+      <h3><i class="pk">P</i>주차</h3>
+      <p>빌라드아모르는 동시 주차 2000대 이상 가능한 넓은 주차장을 가지고 있습니다.<br>무료주차이며 주차 요원이 있어 하객분들께서 보다 더 편리하게 이용 가능하십니다.</p>
+    </div>
+  </section>
+
+  <!-- 6. Detail -->
+  <section class="sec wine detail" id="detail">
+    <span class="heart-mini">♥</span>
+    <h2 class="script big reveal">Detail</h2>
+    <p class="sub reveal">안내사항</p>
+    <div class="slider reveal" id="slider">
+      <div class="track">
+        <div class="slide"><div class="gcard c1"><img src="img/guide1.png" alt=""><p>예식 후 식사가 준비되어 있어요.<br>여유롭게 즐기고 가세요.</p></div></div>
+        <div class="slide"><div class="gcard c2"><img src="img/guide2.png" alt=""><p>따뜻한 차도 준비되어 있으니<br>오랜만에 만난 분들과 함께<br>느긋하고 즐거운 시간<br>보내시길 바랍니다.</p></div></div>
+        <div class="slide"><div class="gcard c3"><img src="img/guide3.png" alt=""><p>넓은 주차장이 준비되어 있고<br>주차는 무료로 이용하실 수 있어요.</p></div></div>
+        <div class="slide"><div class="gcard c4"><img src="img/guide4.png" alt=""><p>궁금하신 점이 있으시면<br>편하게 연락 주세요.</p></div></div>
+      </div>
+      <button class="nav prev" aria-label="이전">‹</button>
+      <button class="nav next" aria-label="다음">›</button>
+      <div class="dots" id="dots"></div>
+    </div>
+  </section>
+
+  <!-- 7. 계좌 -->
+  <section class="sec paper account" id="account">
+    <p class="sub dark reveal">마음 전하실 곳</p>
+    <details class="acc reveal">
+      <summary>신랑 측 계좌번호</summary>
+      <ul>
+        <li><span>신랑 박상현</span><em>신한은행 110-386-353900</em><button data-copy="110386353900">복사</button></li>
+      </ul>
+    </details>
+    <details class="acc reveal">
+      <summary>신부 측 계좌번호</summary>
+      <ul>
+        <li><span>신부 이가경</span><em>카카오뱅크 3333-11-6346673</em><button data-copy="3333116346673">복사</button></li>
+      </ul>
+    </details>
+    <p class="note reveal">참석이 어려우신 분들을 위해 조심스럽게 안내드립니다.<br>보내주시는 따뜻한 마음, 감사히 간직하겠습니다.</p>
+  </section>
+
+  <!-- 8. Share Moments -->
+  <section class="sec wine share" id="share">
+    <h2 class="script big reveal">Share Moments</h2>
+    <p class="sub reveal">사진 공유</p>
+    <div class="frame reveal"><img src="img/ace_1897.jpg" alt="" style="object-position:50% 35%"></div>
+    <p class="msg reveal">결혼식 현장에서 찍은 사진들을<br>신랑신부와 함께 나눠주세요.</p>
+    <a class="btn reveal" id="upload-link" href="#" target="_blank" rel="noopener">사진 업로드</a>
+  </section>
+
+  <!-- 9. 감사 -->
+  <section class="sec paper thanks" id="thanks">
+    <span class="heart-mini dark">♥</span>
+    <p class="sub dark reveal">감사 인사</p>
+    <p class="thanks-msg reveal">
+      저희 두 사람의 새로운 시작을<br>따뜻한 마음으로 축복해 주시면<br>큰 기쁨이 되겠습니다.<br><br>
+      소중한 발걸음에 진심으로 감사드립니다.
+    </p>
+    <p class="sign reveal">박상현 ♥ 이가경</p>
+  </section>
+
+  <footer>© Sanghyun &amp; Gakyung</footer>
+</main>
+
+<div id="lightbox" hidden><button aria-label="닫기">×</button><img alt=""></div>
+<div id="toast" hidden>복사되었어요</div>
+<script src="script.js"></script>
+</body>
+</html>
