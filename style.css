@@ -724,7 +724,10 @@ img {
   font-weight: 700;
   font-size: 18px;
   text-decoration: none;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, .35)
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .35);
+  border: 0;
+  font-family: inherit;
+  cursor: pointer
 }
 
 /* thanks */
@@ -867,4 +870,59 @@ body.lb-open {
   color: #2f2118;
   font-weight: 700;
   letter-spacing: -.01em
+}
+
+.who {
+  display: block;
+  width: min(250px, 72%);
+  margin: 24px auto 0;
+  padding: 12px 16px;
+  border: 2px dotted #b9a27a;
+  border-radius: 4px;
+  background: #f3e6c9;
+  color: #3d2a1e;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+  transform: rotate(-.6deg)
+}
+
+.who::placeholder {
+  color: #8a7655;
+  font-weight: 400
+}
+
+.who:focus {
+  outline: 0;
+  border-color: #8e2330
+}
+
+.upload-status {
+  display: table;
+  margin: 22px auto 0;
+  padding: 0;
+  font-family: var(--hand);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #2c1a12;
+  transform: rotate(.6deg)
+}
+
+.upload-status:not(:empty) {
+  padding: 6px 20px;
+  background: var(--tape);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .25);
+  clip-path: polygon(1% 4%, 99% 0, 100% 96%, 0 100%)
+}
+
+.upload-status.err {
+  color: #7a1622
+}
+
+.btn[disabled] {
+  opacity: .6;
+  cursor: default
 }

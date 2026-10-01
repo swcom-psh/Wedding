@@ -3,7 +3,9 @@
   const CFG = {
     date: new Date('2027-02-13T12:10:00+09:00'),
     venueName: '원주 빌라드아모르',           // 지도 검색어로도 사용
-    uploadLink: '',                    // 하객 사진 업로드 링크 (구글 드라이브 등)
+    uploadEndpoint: '',                // 구글 앱스 스크립트 웹 앱 URL (비우면 업로드 버튼은 '준비 중')
+    uploadToken: '',                   // apps-script/Code.gs 의 TOKEN 과 같은 값
+    uploadMax: 10,                     // 한 번에 올릴 수 있는 최대 장수
     naverMapKey: '',                   // 네이버 지도 API 키(ncpKeyId). 비우면 구글 지도로 표시
     address: '강원 원주시 북원로 2888',
     bgm: '',                           // 배경음악 파일 경로 (예: 'audio/bgm.mp3')
@@ -106,12 +108,42 @@
     };
     document.head.appendChild(sc);
   }
-  if (CFG.uploadLink) $('upload-link').href = CFG.uploadLink;
-  else $('upload-link').addEventListener('click', (e) => {
-    e.preventDefault();
-    toast.textContent = '사진 업로드는 곧 열릴 예정이에요';
-    toast.hidden = false; clearTimeout(toast._t);
-    toast._t = setTimeout(() => { toast.hidden = true; toast.textContent = '복사되었어요'; }, 2000);
+  // ===== 하객 사진 업로드 (구글 드라이브로 자동 전송) =====
+  const upBtn = $('upload-btn'), upInput = $('upload-input'), upStatus = $('upload-status'), upName = $('upload-name');
+  const say = (msg, err) => { upStatus.textContent = msg; upStatus.classList.toggle('err', !!err); };
+  // 긴 변 2400px, JPEG로 줄여서 전송 (폰 사진 용량 줄이기)
+  async function shrink(file){
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const k = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .88));
+    return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+  }
+  upBtn.addEventListener('click', () => {
+    if (!CFG.uploadEndpoint) { say('사진 업로드는 곧 열릴 예정이에요'); return; }
+    upInput.click();
+  });
+  upInput.addEventListener('change', async () => {
+    let files = [...upInput.files].filter(f => f.type.startsWith('image/'));
+    upInput.value = '';
+    if (!files.length) return;
+    if (files.length > CFG.uploadMax) { files = files.slice(0, CFG.uploadMax); say(`한 번에 최대 ${CFG.uploadMax}장까지 올릴 수 있어요. 앞의 ${CFG.uploadMax}장만 올릴게요.`); await new Promise(r => setTimeout(r, 1800)); }
+    upBtn.disabled = true;
+    let ok = 0, fail = 0;
+    for (let i = 0; i < files.length; i++) {
+      say(`업로드 중... (${i + 1}/${files.length})`);
+      try {
+        const data = await shrink(files[i]);
+        const res = await fetch(CFG.uploadEndpoint, { method: 'POST', body: JSON.stringify({ token: CFG.uploadToken, name: upName.value.trim(), index: i + 1, mime: 'image/jpeg', data }) });
+        const j = await res.json();
+        j.ok ? ok++ : fail++;
+      } catch (e) { fail++; }
+    }
+    upBtn.disabled = false;
+    if (fail) say(`${ok}장 업로드 완료, ${fail}장은 실패했어요. 잠시 후 다시 시도해 주세요.`, true);
+    else say(`${ok}장 업로드 완료! 소중한 사진 감사합니다 ♥`);
   });
 
   // ===== 슬라이더 =====
