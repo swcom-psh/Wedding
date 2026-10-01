@@ -107,6 +107,12 @@
     document.head.appendChild(sc);
   }
   if (CFG.uploadLink) $('upload-link').href = CFG.uploadLink;
+  else $('upload-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    toast.textContent = '사진 업로드는 곧 열릴 예정이에요';
+    toast.hidden = false; clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.hidden = true; toast.textContent = '복사되었어요'; }, 2000);
+  });
 
   // ===== 슬라이더 =====
   const slider = $('slider'), track = slider.querySelector('.track'), n = track.children.length, dots = $('dots');
