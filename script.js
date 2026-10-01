@@ -17,7 +17,40 @@
     d.className = 'stamp';
     d.style.setProperty('--r', ((i * 37) % 5 - 2) * .8 + 'deg');
     d.innerHTML = `<img loading="lazy" src="img/ace_${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
+    d.addEventListener('click', () => openLb(i));
     stamps.appendChild(d);
+  });
+
+  // ===== 크게 보기 (확대/축소는 막음) =====
+  const lb = document.getElementById('lightbox'), lbImg = lb.querySelector('img'), lbCount = lb.querySelector('.lb-count');
+  let cur = 0;
+  function showLb(i){
+    cur = (i + photos.length) % photos.length;
+    lbImg.src = `img/ace_${photos[cur]}.jpg`;
+    lbCount.textContent = `${cur + 1} / ${photos.length}`;
+  }
+  function openLb(i){ showLb(i); lb.hidden = false; document.body.classList.add('lb-open'); }
+  function closeLb(){ lb.hidden = true; document.body.classList.remove('lb-open'); }
+  lb.querySelector('.lb-close').addEventListener('click', (e) => { e.stopPropagation(); closeLb(); });
+  lb.querySelector('.lb-prev').addEventListener('click', (e) => { e.stopPropagation(); showLb(cur - 1); });
+  lb.querySelector('.lb-next').addEventListener('click', (e) => { e.stopPropagation(); showLb(cur + 1); });
+  lb.addEventListener('click', closeLb);
+  // 핀치 확대 / 더블탭 확대 차단 (iOS Safari 포함)
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => lb.addEventListener(t, e => e.preventDefault()));
+  lb.addEventListener('dblclick', e => e.preventDefault());
+  lb.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  let lx = null;
+  lb.addEventListener('touchstart', e => { lx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    if (lx === null) return;
+    const dx = e.changedTouches[0].clientX - lx; lx = null;
+    if (Math.abs(dx) > 50) { e.preventDefault(); showLb(cur + (dx < 0 ? 1 : -1)); }
+  });
+  document.addEventListener('keydown', e => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') closeLb();
+    if (e.key === 'ArrowLeft') showLb(cur - 1);
+    if (e.key === 'ArrowRight') showLb(cur + 1);
   });
 
   // ===== 달력 =====
