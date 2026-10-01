@@ -221,8 +221,7 @@ img {
 
 .wide-photo img {
   width: 100%;
-  height: 420px;
-  object-fit: cover
+  height: auto
 }
 
 /* gallery */
@@ -249,7 +248,6 @@ img {
   padding: 4px;
   aspect-ratio: 3/4.1;
   transform: rotate(var(--r, 0deg));
-  cursor: pointer;
   -webkit-mask: linear-gradient(#000 0 0) padding-box, radial-gradient(circle 3px at 5px 5px, transparent 98%, #000) border-box 0 0/10px 10px;
   mask: linear-gradient(#000 0 0) padding-box, radial-gradient(circle 3px at 5px 5px, transparent 98%, #000) border-box 0 0/10px 10px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .3))
@@ -412,30 +410,6 @@ img {
   height: 100%;
   border: 0;
   display: block
-}
-
-.kakao-chip {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px 7px 10px;
-  border-radius: 6px;
-  background: rgba(60, 60, 60, .88);
-  color: #fff;
-  font-size: 13px;
-  line-height: 1;
-  text-decoration: none;
-  font-family: var(--serif);
-  font-weight: 700
-}
-
-.kakao-chip svg {
-  width: 14px;
-  height: 16px;
-  flex: none
 }
 
 .map-btns {
@@ -765,36 +739,6 @@ footer {
 }
 
 /* misc */
-#lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .88);
-  z-index: 100;
-  display: grid;
-  place-items: center
-}
-
-#lightbox[hidden] {
-  display: none
-}
-
-#lightbox img {
-  max-width: 94vw;
-  max-height: 88vh;
-  object-fit: contain
-}
-
-#lightbox button {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  font-size: 38px;
-  background: none;
-  border: 0;
-  color: #fff;
-  cursor: pointer
-}
-
 #toast {
   position: fixed;
   bottom: 40px;

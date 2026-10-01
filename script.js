@@ -4,6 +4,8 @@
     date: new Date('2027-02-13T12:10:00+09:00'),
     venueName: '원주 빌라드아모르',           // 지도 검색어로도 사용
     uploadLink: '',                    // 하객 사진 업로드 링크 (구글 드라이브 등)
+    naverMapKey: '',                   // 네이버 지도 API 키(ncpKeyId). 비우면 구글 지도로 표시
+    address: '강원 원주시 북원로 2888',
     bgm: '',                           // 배경음악 파일 경로 (예: 'audio/bgm.mp3')
   };
 
@@ -15,12 +17,8 @@
     d.className = 'stamp';
     d.style.setProperty('--r', ((i * 37) % 5 - 2) * .8 + 'deg');
     d.innerHTML = `<img loading="lazy" src="img/ace_${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
-    d.addEventListener('click', () => openLb(`img/ace_${n}.jpg`));
     stamps.appendChild(d);
   });
-  const lb = document.getElementById('lightbox');
-  function openLb(src){ lb.querySelector('img').src = src; lb.hidden = false; }
-  lb.addEventListener('click', () => lb.hidden = true);
 
   // ===== 달력 =====
   const cal = document.getElementById('cal');
@@ -49,7 +47,6 @@
   // ===== 지도 링크 =====
   const q = encodeURIComponent(CFG.venueName);
   $('lk-naver').href = `https://map.naver.com/p/search/${q}`;
-  $('lk-kakao').href = `https://map.kakao.com/link/search/${q}`;
   $('lk-tmap').href = '#';
   $('lk-tmap').addEventListener('click', (e) => {
     e.preventDefault();
@@ -60,6 +57,22 @@
     setTimeout(() => { if (!document.hidden && Date.now() - t < 2500) location.href = ios ? 'https://apps.apple.com/kr/app/id431589174' : 'https://play.google.com/store/apps/details?id=com.skt.tmap.ku'; }, 1500);
   });
   $('lk-google').href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  // ===== 네이버 지도 (키가 있을 때만) =====
+  if (CFG.naverMapKey) {
+    const mapBox = $('map');
+    const sc = document.createElement('script');
+    sc.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${CFG.naverMapKey}&submodules=geocoder`;
+    sc.onload = () => {
+      naver.maps.Service.geocode({ query: CFG.address }, (status, res) => {
+        if (status !== naver.maps.Service.Status.OK || !res.v2.addresses.length) return;
+        const a = res.v2.addresses[0], pos = new naver.maps.LatLng(a.y, a.x);
+        mapBox.innerHTML = '';
+        const map = new naver.maps.Map(mapBox, { center: pos, zoom: 16, scaleControl: false, mapDataControl: false });
+        new naver.maps.Marker({ position: pos, map });
+      });
+    };
+    document.head.appendChild(sc);
+  }
   if (CFG.uploadLink) $('upload-link').href = CFG.uploadLink;
 
   // ===== 슬라이더 =====
