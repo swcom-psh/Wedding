@@ -3,12 +3,12 @@
   const CFG = {
     date: new Date('2027-02-13T12:10:00+09:00'),
     venueName: '원주 빌라드아모르',           // 지도 검색어로도 사용
-    uploadEndpoint: '',                // 구글 앱스 스크립트 웹 앱 URL (비우면 업로드 버튼은 '준비 중')
-    uploadToken: '',                   // apps-script/Code.gs 의 TOKEN 과 같은 값
+    uploadEndpoint: 'https://script.google.com/macros/s/AKfycbzzSt8YDTWCB1wTmfj0hbjqtKirou_Qspla-VR3QOqoH0yQNsniYpVhhJhPmu3DjOLRVA/exec',                // 구글 앱스 스크립트 웹 앱 URL (비우면 업로드 버튼은 '준비 중')
+    uploadToken: '여기에-아무-긴-문자열',                   // apps-script/Code.gs 의 TOKEN 과 같은 값
     uploadMax: 10,                     // 한 번에 올릴 수 있는 최대 장수
     naverMapKey: '',                   // 네이버 지도 API 키(ncpKeyId). 비우면 구글 지도로 표시
     address: '강원 원주시 북원로 2888',
-    bgm: '',                           // 배경음악 파일 경로 (예: 'audio/bgm.mp3')
+    bgm: 'audio/bgm.m4a',                           // 배경음악 파일 경로 (예: 'audio/bgm.mp3')
   };
 
   // ===== 갤러리 =====
@@ -172,10 +172,28 @@
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // ===== BGM (파일 지정 시에만 버튼 표시) =====
+  // ===== BGM =====
+  // 브라우저는 소리 자동재생을 막으므로, 처음 화면을 터치/클릭하는 순간 재생을 시작해요.
   if (CFG.bgm) {
     const a = $('bgm'), btn = $('bgm-btn');
-    a.src = CFG.bgm; btn.hidden = false;
-    btn.addEventListener('click', () => { if (a.paused) { a.play(); btn.classList.add('on'); } else { a.pause(); btn.classList.remove('on'); } });
+    a.src = CFG.bgm; a.volume = .7; btn.hidden = false;
+    let wantPlay = true, started = false;
+    const sync = () => btn.classList.toggle('on', !a.paused);
+    a.addEventListener('play', sync); a.addEventListener('pause', sync);
+    const start = () => { if (started || !wantPlay) return; a.play().then(() => { started = true; cleanup(); }).catch(() => {}); };
+    const evs = ['pointerdown', 'touchend', 'click', 'keydown'];
+    const cleanup = () => evs.forEach(t => document.removeEventListener(t, start, true));
+    evs.forEach(t => document.addEventListener(t, start, true));
+    a.play().then(() => { started = true; cleanup(); }).catch(() => {});   // 자동재생이 허용되는 환경이면 바로 재생
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (a.paused) { wantPlay = true; a.play().catch(() => {}); } else { wantPlay = false; a.pause(); }
+    });
+    // 홈 화면으로 나가거나 탭을 바꾸면 멈췄다가, 돌아오면 이어서 재생
+    let resume = false;
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { resume = !a.paused; a.pause(); }
+      else if (resume && wantPlay) a.play().catch(() => {});
+    });
   }
 })();
