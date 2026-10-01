@@ -4,7 +4,7 @@
     date: new Date('2027-02-13T12:10:00+09:00'),
     venueName: '원주 빌라드아모르',           // 지도 검색어로도 사용
     uploadEndpoint: 'https://script.google.com/macros/s/AKfycbzzSt8YDTWCB1wTmfj0hbjqtKirou_Qspla-VR3QOqoH0yQNsniYpVhhJhPmu3DjOLRVA/exec',                // 구글 앱스 스크립트 웹 앱 URL (비우면 업로드 버튼은 '준비 중')
-    uploadToken: '여기에-아무-긴-문자열',                   // apps-script/Code.gs 의 TOKEN 과 같은 값
+    uploadToken: 'wd2027-k8Xp3mQ7vNa2LrT9',                   // apps-script/Code.gs 의 TOKEN 과 같은 값
     uploadMax: 10,                     // 한 번에 올릴 수 있는 최대 장수
     naverMapKey: '',                   // 네이버 지도 API 키(ncpKeyId). 비우면 구글 지도로 표시
     address: '강원 원주시 북원로 2888',
