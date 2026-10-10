@@ -12,7 +12,8 @@
   };
 
   // ===== 갤러리 =====
-  const photos = Array.from({ length: 32 }, (_, i) => String(i + 1).padStart(2, '0'));   // img/gallery/01.jpg ~ 32.jpg
+  const SHARE_PHOTO = 30;   // 'Share Moments' 섹션에서 쓰는 사진 번호(갤러리에서는 제외)
+  const photos = Array.from({ length: 32 }, (_, i) => i + 1).filter(n => n !== SHARE_PHOTO).map(n => String(n).padStart(2, '0'));   // img/gallery/01.jpg ~ 32.jpg
   const stamps = document.getElementById('stamps');
   photos.forEach((n, i) => {
     const d = document.createElement('div');
@@ -26,13 +27,13 @@
   // ===== 크게 보기 (확대/축소는 막음) =====
   const lb = document.getElementById('lightbox'), lbImg = lb.querySelector('img'), lbCount = lb.querySelector('.lb-count');
   let cur = 0;
-  function showLb(i){
+  function showLb(i) {
     cur = (i + photos.length) % photos.length;
     lbImg.src = `img/gallery/${photos[cur]}.jpg`;
     lbCount.textContent = `${cur + 1} / ${photos.length}`;
   }
-  function openLb(i){ showLb(i); lb.hidden = false; document.body.classList.add('lb-open'); }
-  function closeLb(){ lb.hidden = true; document.body.classList.remove('lb-open'); }
+  function openLb(i) { showLb(i); lb.hidden = false; document.body.classList.add('lb-open'); }
+  function closeLb() { lb.hidden = true; document.body.classList.remove('lb-open'); }
   lb.querySelector('.lb-close').addEventListener('click', (e) => { e.stopPropagation(); closeLb(); });
   lb.querySelector('.lb-prev').addEventListener('click', (e) => { e.stopPropagation(); showLb(cur - 1); });
   lb.querySelector('.lb-next').addEventListener('click', (e) => { e.stopPropagation(); showLb(cur + 1); });
@@ -69,7 +70,7 @@
 
   // ===== 카운트다운 =====
   const $ = (id) => document.getElementById(id), pad = (n) => String(n).padStart(2, '0');
-  function tick(){
+  function tick() {
     let diff = CFG.date - Date.now();
     if (diff < 0) diff = 0;
     const d = Math.floor(diff / 864e5), h = Math.floor(diff / 36e5) % 24, mi = Math.floor(diff / 6e4) % 60, s = Math.floor(diff / 1e3) % 60;
@@ -112,7 +113,7 @@
   const upBtn = $('upload-btn'), upInput = $('upload-input'), upStatus = $('upload-status'), upName = $('upload-name');
   const say = (msg, err) => { upStatus.textContent = msg; upStatus.classList.toggle('err', !!err); };
   // 긴 변 2400px, JPEG로 줄여서 전송 (폰 사진 용량 줄이기)
-  async function shrink(file){
+  async function shrink(file) {
     const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
     const k = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
     const c = document.createElement('canvas');
@@ -150,7 +151,7 @@
   const slider = $('slider'), track = slider.querySelector('.track'), n = track.children.length, dots = $('dots');
   let idx = 0;
   for (let i = 0; i < n; i++) dots.appendChild(document.createElement('i'));
-  function go(i){
+  function go(i) {
     idx = (i + n) % n;
     track.style.transform = `translateX(${-idx * 100}%)`;
     [...dots.children].forEach((d, k) => d.classList.toggle('on', k === idx));
@@ -164,7 +165,7 @@
 
   // ===== 계좌 복사 =====
   document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copy); } catch (e) {}
+    try { await navigator.clipboard.writeText(b.dataset.copy); } catch (e) { }
     toast.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => toast.hidden = true, 1600);
   }));
 
@@ -180,20 +181,20 @@
     let wantPlay = true, started = false;
     const sync = () => btn.classList.toggle('on', !a.paused);
     a.addEventListener('play', sync); a.addEventListener('pause', sync);
-    const start = () => { if (started || !wantPlay) return; a.play().then(() => { started = true; cleanup(); }).catch(() => {}); };
+    const start = () => { if (started || !wantPlay) return; a.play().then(() => { started = true; cleanup(); }).catch(() => { }); };
     const evs = ['pointerdown', 'touchend', 'click', 'keydown'];
     const cleanup = () => evs.forEach(t => document.removeEventListener(t, start, true));
     evs.forEach(t => document.addEventListener(t, start, true));
-    a.play().then(() => { started = true; cleanup(); }).catch(() => {});   // 자동재생이 허용되는 환경이면 바로 재생
+    a.play().then(() => { started = true; cleanup(); }).catch(() => { });   // 자동재생이 허용되는 환경이면 바로 재생
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (a.paused) { wantPlay = true; a.play().catch(() => {}); } else { wantPlay = false; a.pause(); }
+      if (a.paused) { wantPlay = true; a.play().catch(() => { }); } else { wantPlay = false; a.pause(); }
     });
     // 홈 화면으로 나가거나 탭을 바꾸면 멈췄다가, 돌아오면 이어서 재생
     let resume = false;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { resume = !a.paused; a.pause(); }
-      else if (resume && wantPlay) a.play().catch(() => {});
+      else if (resume && wantPlay) a.play().catch(() => { });
     });
   }
 })();
