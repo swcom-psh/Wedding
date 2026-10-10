@@ -551,8 +551,12 @@ img {
 }
 
 .gcard.c1 {
-  --ty: 60%;
-  --tw: 66%
+  --ty: 62%;
+  --tw: 84%
+}
+
+.gcard.c1 p {
+  font-size: 4.4cqw
 }
 
 .gcard.c2 {
