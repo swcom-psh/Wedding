@@ -12,13 +12,13 @@
   };
 
   // ===== 갤러리 =====
-  const photos = ['1231','0560','1337','1430','1514','0005','1804','1690','1857','1897','0537'];
+  const photos = Array.from({ length: 32 }, (_, i) => String(i + 1).padStart(2, '0'));   // img/gallery/01.jpg ~ 32.jpg
   const stamps = document.getElementById('stamps');
   photos.forEach((n, i) => {
     const d = document.createElement('div');
     d.className = 'stamp';
     d.style.setProperty('--r', ((i * 37) % 5 - 2) * .8 + 'deg');
-    d.innerHTML = `<img loading="lazy" src="img/ace_${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
+    d.innerHTML = `<img loading="lazy" src="img/gallery/thumb/${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
     d.addEventListener('click', () => openLb(i));
     stamps.appendChild(d);
   });
@@ -28,7 +28,7 @@
   let cur = 0;
   function showLb(i){
     cur = (i + photos.length) % photos.length;
-    lbImg.src = `img/ace_${photos[cur]}.jpg`;
+    lbImg.src = `img/gallery/${photos[cur]}.jpg`;
     lbCount.textContent = `${cur + 1} / ${photos.length}`;
   }
   function openLb(i){ showLb(i); lb.hidden = false; document.body.classList.add('lb-open'); }
