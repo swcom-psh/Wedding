@@ -14,15 +14,28 @@
   // ===== 갤러리 =====
   const SHARE_PHOTO = 30;   // 'Share Moments' 섹션에서 쓰는 사진 번호(갤러리에서는 제외)
   const photos = Array.from({ length: 32 }, (_, i) => i + 1).filter(n => n !== SHARE_PHOTO).map(n => String(n).padStart(2, '0'));   // img/gallery/01.jpg ~ 32.jpg
+  const SHOW_FIRST = 12;   // 처음에 보여줄 사진 수 (3장 × 4줄)
   const stamps = document.getElementById('stamps');
   photos.forEach((n, i) => {
     const d = document.createElement('div');
-    d.className = 'stamp';
+    d.className = 'stamp' + (i >= SHOW_FIRST ? ' extra' : '');
     d.style.setProperty('--r', ((i * 37) % 5 - 2) * .8 + 'deg');
     d.innerHTML = `<img loading="lazy" src="img/gallery/thumb/${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
     d.addEventListener('click', () => openLb(i));
     stamps.appendChild(d);
   });
+  // ===== 갤러리 더보기 =====
+  const moreBtn = document.getElementById('more-btn'), extra = photos.length - SHOW_FIRST;
+  if (extra > 0) {
+    const label = (open) => { moreBtn.textContent = open ? '접기 ▴' : `사진 더보기 (+${extra}) ▾`; moreBtn.setAttribute('aria-expanded', open); };
+    moreBtn.hidden = false; label(false);
+    moreBtn.addEventListener('click', () => {
+      const open = !stamps.classList.contains('open');
+      stamps.classList.toggle('open', open);
+      label(open);
+      if (!open) document.getElementById('gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   // ===== 크게 보기 (확대/축소는 막음) =====
   const lb = document.getElementById('lightbox'), lbImg = lb.querySelector('img'), lbCount = lb.querySelector('.lb-count');

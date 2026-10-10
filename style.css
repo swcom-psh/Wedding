@@ -930,3 +930,44 @@ body.lb-open {
   opacity: .6;
   cursor: default
 }
+
+/* 갤러리 더보기 */
+.stamps:not(.open) .stamp.extra {
+  display: none
+}
+
+.stamps.open .stamp.extra {
+  animation: stampIn .5s ease both
+}
+
+@keyframes stampIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) rotate(var(--r, 0deg))
+  }
+
+  to {
+    opacity: 1;
+    transform: rotate(var(--r, 0deg))
+  }
+}
+
+.more {
+  display: block;
+  margin: 26px auto 4px;
+  padding: 14px 30px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--wine);
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+  -webkit-tap-highlight-color: transparent
+}
+
+.more:active {
+  transform: translateY(1px)
+}
