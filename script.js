@@ -27,7 +27,7 @@
   // ===== 갤러리 더보기 =====
   const moreBtn = document.getElementById('more-btn'), extra = photos.length - SHOW_FIRST;
   if (extra > 0) {
-    const label = (open) => { moreBtn.textContent = open ? '접기 ▴' : `사진 더보기 (+${extra}) ▾`; moreBtn.setAttribute('aria-expanded', open); };
+    const label = (open) => { moreBtn.textContent = open ? '접기 ▴' : `사진 더보기 ▾`; moreBtn.setAttribute('aria-expanded', open); };
     moreBtn.hidden = false; label(false);
     moreBtn.addEventListener('click', () => {
       const open = !stamps.classList.contains('open');
