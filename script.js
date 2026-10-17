@@ -12,15 +12,15 @@
   };
 
   // ===== 갤러리 =====
-  const SHARE_PHOTO = 30;   // 'Share Moments' 섹션에서 쓰는 사진 번호(갤러리에서는 제외)
-  const photos = Array.from({ length: 32 }, (_, i) => i + 1).filter(n => n !== SHARE_PHOTO).map(n => String(n).padStart(2, '0'));   // img/gallery/01.jpg ~ 32.jpg
+  // 사진 목록은 img/gallery/gallery.js (tools/build_gallery.py 로 생성)에서 읽어요
+  const photos = (window.GALLERY || []).map(p => ({ file: p.file, v: p.v }));
   const SHOW_FIRST = 12;   // 처음에 보여줄 사진 수 (3장 × 4줄)
   const stamps = document.getElementById('stamps');
   photos.forEach((n, i) => {
     const d = document.createElement('div');
     d.className = 'stamp' + (i >= SHOW_FIRST ? ' extra' : '');
     d.style.setProperty('--r', ((i * 37) % 5 - 2) * .8 + 'deg');
-    d.innerHTML = `<img loading="lazy" src="img/gallery/thumb/${n}.jpg" alt="웨딩 사진 ${i + 1}">`;
+    d.innerHTML = `<img loading="lazy" src="img/gallery/thumb/${n.file}?v=${n.v}" alt="웨딩 사진 ${i + 1}">`;
     d.addEventListener('click', () => openLb(i));
     stamps.appendChild(d);
   });
@@ -42,7 +42,7 @@
   let cur = 0;
   function showLb(i) {
     cur = (i + photos.length) % photos.length;
-    lbImg.src = `img/gallery/${photos[cur]}.jpg`;
+    lbImg.src = `img/gallery/${photos[cur].file}?v=${photos[cur].v}`;
     lbCount.textContent = `${cur + 1} / ${photos.length}`;
   }
   function openLb(i) { showLb(i); lb.hidden = false; document.body.classList.add('lb-open'); }
