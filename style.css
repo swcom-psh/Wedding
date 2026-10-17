@@ -162,23 +162,30 @@ img {
 }
 
 .parents {
+  /* 부모님 성함 · 관계 · 이름을 세 칸으로 나눠 두 줄의 위치를 맞춤 */
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 10px;
   margin: 44px 0 10px;
   font-size: 17px;
   line-height: 2
 }
 
 .parents span {
-  display: block
+  text-align: right
 }
 
 .parents em {
   font-style: normal;
   opacity: .8;
-  margin: 0 6px
+  text-align: left
 }
 
 .parents b {
-  font-size: 19px
+  font-size: 19px;
+  text-align: left
 }
 
 .locket {
