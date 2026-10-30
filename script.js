@@ -13,7 +13,8 @@
  *   Slider ......... 안내사항 카드 (끌어서 넘기기·자동 넘김)
  *   Accordion ...... 계좌번호 펼치기 애니메이션
  *   Copy ........... 계좌 복사
- *   Upload ......... 하객 사진 업로드 (구글 드라이브)
+ *   Sheet .......... 아래에서 올라오는 창 (방명록 글쓰기·전체보기·삭제)
+ *   Guestbook ...... 방명록 (구글 스프레드시트에 저장)
  *   Bgm ............ 배경음악
  *
  * 애니메이션을 더하고 싶을 때
@@ -30,9 +31,9 @@
     venueName: '원주 빌라드아모르',            // 지도 검색어
     address: '강원 원주시 북원로 2888',
     naverMapKey: '',                           // 네이버 지도 API 키(ncpKeyId). 비우면 구글 지도로 표시
-    uploadEndpoint: 'https://script.google.com/macros/s/AKfycbzzSt8YDTWCB1wTmfj0hbjqtKirou_Qspla-VR3QOqoH0yQNsniYpVhhJhPmu3DjOLRVA/exec',
-    uploadToken: 'wd2027-k8Xp3mQ7vNa2LrT9',   // apps-script/Code.gs 의 TOKEN 과 같은 값
-    uploadMax: 10,                             // 한 번에 올릴 수 있는 최대 장수
+    // 방명록 저장소 (구글 앱스 스크립트 웹 앱 — apps-script/Code.gs)
+    guestbookEndpoint: 'https://script.google.com/macros/s/AKfycbzzSt8YDTWCB1wTmfj0hbjqtKirou_Qspla-VR3QOqoH0yQNsniYpVhhJhPmu3DjOLRVA/exec',
+    guestbookToken: 'wd2027-k8Xp3mQ7vNa2LrT9', // apps-script/Code.gs 의 TOKEN 과 같은 값
     bgm: 'audio/bgm.m4a',                      // 배경음악 파일 (비우면 버튼 숨김)
     galleryFirst: 12,                          // 갤러리 처음에 보여줄 사진 수 (3장 × 4줄)
     sliderAutoMs: 5000,                        // 안내사항 카드 자동 넘김 간격 (0이면 끔)
@@ -393,50 +394,146 @@
     }));
   })();
 
-  // ===== 하객 사진 업로드 (구글 드라이브로 자동 전송) =====
-  (function Upload() {
-    const btn = $('upload-btn'), input = $('upload-input'), status = $('upload-status'), name = $('upload-name');
-    const say = (msg, err) => { status.textContent = msg; status.classList.toggle('err', !!err); };
-    // 긴 변 2400px, JPEG로 줄여서 전송 (폰 사진 용량 줄이기)
-    async function shrink(file) {
-      const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
-      const k = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-      const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', .88));
-      return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+  // ===== 아래에서 올라오는 창 (방명록 글쓰기·전체보기·삭제) =====
+  const Sheet = (() => {
+    let openEl = null;
+    function open(el) {
+      if (openEl) close(true);
+      openEl = el;
+      ScrollLock.lock();
+      el.classList.add('open'); el.setAttribute('aria-hidden', 'false');
+      history.pushState({ sheet: 1 }, '');
+      const first = el.querySelector('input, textarea');
+      if (first) setTimeout(() => first.focus({ preventScroll: true }), 350);
     }
-    btn.addEventListener('click', () => {
-      if (!CFG.uploadEndpoint) { say('사진 업로드는 곧 열릴 예정이에요'); return; }
-      input.click();
+    function close(fromPop) {
+      if (!openEl) return;
+      const el = openEl; openEl = null;
+      el.classList.remove('open'); el.setAttribute('aria-hidden', 'true');
+      ScrollLock.unlock();
+      if (fromPop !== true && history.state && history.state.sheet) history.back();
+    }
+    $$('.sheet').forEach((el) => {
+      el.addEventListener('click', (e) => { if (e.target === el || e.target.closest('[data-close]')) close(); });
     });
-    input.addEventListener('change', async () => {
-      let files = [...input.files].filter((f) => f.type.startsWith('image/'));
-      input.value = '';
-      if (!files.length) return;
-      if (files.length > CFG.uploadMax) {
-        files = files.slice(0, CFG.uploadMax);
-        say(`한 번에 최대 ${CFG.uploadMax}장까지 올릴 수 있어요. 앞의 ${CFG.uploadMax}장만 올릴게요.`);
-        await new Promise((r) => setTimeout(r, 1800));
+    addEventListener('popstate', () => { if (openEl) close(true); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && openEl) close(); });
+    return { open, close };
+  })();
+
+  // ===== 방명록 =====
+  (function Guestbook() {
+    const list = $('gb-list'), grid = $('gb-grid');
+    const writeSheet = $('gb-write-sheet'), allSheet = $('gb-all-sheet'), delSheet = $('gb-del-sheet');
+    const form = $('gb-form'), delForm = $('gb-del-form');
+    const F = form.elements, D = delForm.elements;   // form.name 은 폼 자체 이름이라 입력칸은 elements 로 접근
+    const PREVIEW = 6;              // 본문에 가로로 보여줄 글 수 (나머지는 전체보기)
+    let items = [], delId = null;
+
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmt = (t) => { const d = new Date(t); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; };
+
+    // 레이스 카드와 편지지 카드를 번갈아 사용
+    function card(it, i) {
+      const kind = i % 2 ? 'letter' : 'lace';
+      return `<article class="gb-card ${kind}" data-id="${esc(it.id)}">
+        <button type="button" class="gb-del" aria-label="${esc(it.name)}님의 글 삭제">×</button>
+        <div class="gb-body">
+          <p class="gb-text">${esc(it.message).replace(/\n/g, '<br>')}</p>
+          <p class="gb-name">- ${esc(it.name)} -</p>
+          <p class="gb-date">${fmt(it.time)}</p>
+        </div>
+      </article>`;
+    }
+
+    function render() {
+      if (!items.length) {
+        list.innerHTML = '<p class="gb-empty">첫 번째 축하 메시지를 남겨주세요 ♥</p>';
+      } else {
+        list.innerHTML = items.slice(0, PREVIEW).map(card).join('');
+        list.scrollLeft = 0;
       }
-      btn.disabled = true; btn.classList.add('busy');
-      let ok = 0, fail = 0;
-      for (let i = 0; i < files.length; i++) {
-        say(`업로드 중... (${i + 1}/${files.length})`);
-        btn.style.setProperty('--p', `${(i / files.length) * 100}%`);
-        try {
-          const data = await shrink(files[i]);
-          const res = await fetch(CFG.uploadEndpoint, { method: 'POST', body: JSON.stringify({ token: CFG.uploadToken, name: name.value.trim(), index: i + 1, mime: 'image/jpeg', data }) });
-          (await res.json()).ok ? ok++ : fail++;
-        } catch (e) { fail++; }
+      grid.innerHTML = items.length ? items.map(card).join('') : '<p class="gb-empty dark">아직 남겨진 글이 없어요</p>';
+      $('gb-all').hidden = items.length <= 1;
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(`${CFG.guestbookEndpoint}?action=list&t=${Date.now()}`);
+        const j = await res.json();
+        const server = Array.isArray(j.items) ? j.items : [];
+        // 불러오는 사이에 방금 남긴 글이 있으면 사라지지 않게 합침
+        const ids = new Set(server.map((it) => it.id));
+        items = [...items.filter((it) => !ids.has(it.id)), ...server];
+        render();
+      } catch (e) {
+        list.innerHTML = '<p class="gb-empty">방명록을 불러오지 못했어요. 잠시 후 다시 열어주세요.</p>';
       }
-      btn.style.setProperty('--p', '100%');
-      setTimeout(() => { btn.disabled = false; btn.classList.remove('busy'); btn.style.removeProperty('--p'); }, 400);
-      haptic(20);
-      if (fail) say(`${ok}장 업로드 완료, ${fail}장은 실패했어요. 잠시 후 다시 시도해 주세요.`, true);
-      else say(`${ok}장 업로드 완료! 소중한 사진 감사합니다 ♥`);
+    }
+
+    async function post(body) {
+      const res = await fetch(CFG.guestbookEndpoint, { method: 'POST', body: JSON.stringify({ token: CFG.guestbookToken, ...body }) });
+      return res.json();
+    }
+
+    // 글쓰기
+    const len = form.querySelector('.gb-len'), msgEl = form.querySelector('.gb-msg'), submit = form.querySelector('[type=submit]');
+    F.message.addEventListener('input', () => { len.textContent = `${F.message.value.length} / 300`; });
+    F.pw.addEventListener('input', () => { F.pw.value = F.pw.value.replace(/\D/g, '').slice(0, 4); });
+    $('gb-write').addEventListener('click', () => { msgEl.textContent = ''; Sheet.open(writeSheet); });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = F.name.value.trim(), message = F.message.value.trim(), pw = F.pw.value;
+      if (!name) { msgEl.textContent = '이름을 적어주세요'; F.name.focus(); return; }
+      if (!message) { msgEl.textContent = '내용을 적어주세요'; F.message.focus(); return; }
+      if (!/^\d{4}$/.test(pw)) { msgEl.textContent = '비밀번호는 숫자 4자리예요'; F.pw.focus(); return; }
+      submit.disabled = true; submit.textContent = '남기는 중...'; msgEl.textContent = '';
+      try {
+        const j = await post({ action: 'add', name, message, pw });
+        if (!j.ok) throw new Error(j.error || '');
+        items.unshift(j.item); render();
+        form.reset(); len.textContent = '0 / 300';
+        Sheet.close(); haptic(15); toast('축하 메시지가 남겨졌어요 ♥');
+        $('guestbook').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      } catch (err) {
+        msgEl.textContent = err.message && err.message !== 'Failed to fetch' ? err.message : '저장하지 못했어요. 잠시 후 다시 시도해 주세요.';
+      } finally {
+        submit.disabled = false; submit.textContent = '남기기';
+      }
     });
+
+    // 전체보기
+    $('gb-all').addEventListener('click', () => Sheet.open(allSheet));
+
+    // 삭제 (작성할 때 정한 비밀번호로)
+    const delMsg = delForm.querySelector('.gb-msg'), delBtn = delForm.querySelector('[type=submit]');
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('.gb-del'); if (!b) return;
+      delId = b.closest('.gb-card').dataset.id;
+      delForm.reset(); delMsg.textContent = '';
+      Sheet.open(delSheet);
+    });
+    delForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!D.pw.value) { delMsg.textContent = '비밀번호를 적어주세요'; return; }
+      delBtn.disabled = true; delBtn.textContent = '삭제하는 중...';
+      try {
+        const j = await post({ action: 'delete', id: delId, pw: D.pw.value });
+        if (!j.ok) throw new Error(j.error || '');
+        items = items.filter((it) => it.id !== delId); render();
+        Sheet.close(); toast('글이 삭제되었어요');
+      } catch (err) {
+        delMsg.textContent = err.message && err.message !== 'Failed to fetch' ? err.message : '삭제하지 못했어요. 잠시 후 다시 시도해 주세요.';
+      } finally {
+        delBtn.disabled = false; delBtn.textContent = '삭제하기';
+      }
+    });
+
+    // 방명록 근처까지 스크롤하면 불러오기 (첫 화면을 빠르게)
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); load(); } }, { rootMargin: '600px 0px' });
+      io.observe($('guestbook'));
+    } else load();
   })();
 
   // ===== 배경음악 =====

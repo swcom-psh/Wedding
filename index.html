@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nothing+You+Could+Do&family=Reenie+Beanie&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=35">
 </head>
 
 <body>
@@ -184,16 +184,17 @@
       <p class="note reveal">참석이 어려우신 분들을 위해 조심스럽게 안내드립니다.<br>보내주시는 따뜻한 마음, 감사히 간직하겠습니다.</p>
     </section>
 
-    <!-- 8. Share Moments -->
-    <section class="sec wine share" id="share">
-      <h2 class="script big reveal">Share Moments</h2>
-      <p class="sub reveal">사진 공유</p>
-      <div class="frame reveal"><img src="img/share.jpg" alt="" style="object-position:50% 28%"></div>
-      <p class="msg reveal">결혼식 현장에서 찍은 사진들을<br>신랑신부와 함께 나눠주세요.</p>
-      <input class="who reveal" id="upload-name" type="text" maxlength="12" placeholder="이름 (선택)" autocomplete="off">
-      <button class="btn reveal" id="upload-btn" type="button">사진 업로드</button>
-      <input id="upload-input" type="file" accept="image/*" multiple hidden>
-      <p class="upload-status" id="upload-status" role="status" aria-live="polite"></p>
+    <!-- 8. 방명록 -->
+    <section class="sec wine guestbook" id="guestbook">
+      <h2 class="script big reveal">Guestbook</h2>
+      <p class="sub reveal">방명록</p>
+      <div class="gb-list reveal" id="gb-list" aria-live="polite">
+        <p class="gb-empty">방명록을 불러오는 중이에요...</p>
+      </div>
+      <div class="gb-actions reveal">
+        <button type="button" class="gb-btn" id="gb-write">작성하기</button>
+        <button type="button" class="gb-btn" id="gb-all">전체보기</button>
+      </div>
     </section>
 
     <!-- 9. 감사 -->
@@ -217,9 +218,36 @@
     <button class="lb-next" aria-label="다음 사진">›</button>
     <div class="lb-count"></div>
   </div>
+  <div class="sheet" id="gb-write-sheet" role="dialog" aria-modal="true" aria-label="방명록 작성" aria-hidden="true">
+    <form class="sheet-card letter" id="gb-form" novalidate>
+      <button type="button" class="sheet-x" data-close aria-label="닫기">×</button>
+      <h3>축하 메시지 남기기</h3>
+      <label>이름<input name="name" maxlength="12" autocomplete="name" required></label>
+      <label>내용<textarea name="message" maxlength="300" rows="5" required placeholder="두 사람에게 따뜻한 한마디를 남겨주세요"></textarea><span class="gb-len">0 / 300</span></label>
+      <label>비밀번호 <small>(숫자 4자리 · 글을 지울 때 필요해요)</small><input name="pw" inputmode="numeric" pattern="\d{4}" maxlength="4" autocomplete="off" required></label>
+      <p class="gb-msg" role="alert"></p>
+      <button type="submit" class="gb-btn solid">남기기</button>
+    </form>
+  </div>
+  <div class="sheet" id="gb-all-sheet" role="dialog" aria-modal="true" aria-label="방명록 전체보기" aria-hidden="true">
+    <div class="sheet-card wide">
+      <button type="button" class="sheet-x" data-close aria-label="닫기">×</button>
+      <h3>방명록</h3>
+      <div class="gb-grid" id="gb-grid"></div>
+    </div>
+  </div>
+  <div class="sheet" id="gb-del-sheet" role="dialog" aria-modal="true" aria-label="방명록 삭제" aria-hidden="true">
+    <form class="sheet-card letter small" id="gb-del-form" novalidate>
+      <button type="button" class="sheet-x" data-close aria-label="닫기">×</button>
+      <h3>글 삭제</h3>
+      <label>작성할 때 정한 비밀번호<input name="pw" inputmode="numeric" maxlength="20" autocomplete="off" required></label>
+      <p class="gb-msg" role="alert"></p>
+      <button type="submit" class="gb-btn solid">삭제하기</button>
+    </form>
+  </div>
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="img/gallery/gallery.js?v=5dcfd263"></script>
-  <script src="script.js?v=33"></script>
+  <script src="script.js?v=37"></script>
 </body>
 
 </html>
