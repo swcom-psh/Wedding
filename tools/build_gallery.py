@@ -49,7 +49,7 @@ def main():
         sm = im.copy(); sm.thumbnail((640, 640), Image.LANCZOS)
         sm.save(os.path.join(THUMB, name), quality=80, optimize=True)
         h = hashlib.md5(open(found[n], 'rb').read()).hexdigest()[:8]
-        items.append({'file': name, 'v': h})
+        items.append({'file': name, 'v': h, 'w': im.width, 'h': im.height})
         print(f'  {n:>3} -> img/gallery/{name}')
 
     keep = {it['file'] for it in items}
