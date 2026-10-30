@@ -446,7 +446,7 @@
     const a = $('bgm'), btn = $('bgm-btn');
     const TARGET = .7;
     a.src = CFG.bgm; a.volume = 0; btn.hidden = false;
-    let wantPlay = true, started = false;
+    let wantPlay = true, started = false, resume = false;
 
     // 갑자기 크게 나오지 않도록 서서히 키우고, 끌 때도 서서히 줄임
     function fade(to, ms = 900, then) {
@@ -476,8 +476,13 @@
       if (a.paused) { wantPlay = true; play().catch(() => { }); }
       else { wantPlay = false; fade(0, 500, () => a.pause()); }
     });
+    // 같은 청첩장을 탭 여러 개로 열어도 한 곳에서만 재생 (다른 탭이 재생을 시작하면 이 탭은 멈춤)
+    if ('BroadcastChannel' in window) {
+      const ch = new BroadcastChannel('wedding-bgm'), me = Math.random().toString(36).slice(2);
+      a.addEventListener('play', () => ch.postMessage(me));
+      ch.onmessage = (e) => { if (e.data !== me && !a.paused) { resume = false; cancelAnimationFrame(a._raf); a.pause(); } };
+    }
     // 홈 화면으로 나가거나 탭을 바꾸면 멈췄다가, 돌아오면 이어서 재생
-    let resume = false;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { resume = !a.paused; a.pause(); }
       else if (resume && wantPlay) play().catch(() => { });
