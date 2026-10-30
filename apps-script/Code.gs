@@ -2,6 +2,9 @@
  * 청첩장 방명록 저장소 (구글 앱스 스크립트)
  * 방명록 글은 내 구글 드라이브의 스프레드시트 "청첩장 방명록"에 저장됩니다. (처음 글이 올라올 때 자동 생성)
  *
+ * 처음 한 번: 편집기 위쪽 함수 선택 칸에서 setup 을 고르고 ▶ 실행 → 권한 허용
+ *   (스프레드시트를 만들 권한이 필요해요. 이걸 안 하면 방명록이 '권한 없음' 오류로 동작하지 않아요)
+ *
  * 배포 방법 (이미 배포한 적이 있으면 URL을 그대로 쓰기 위해 '새 버전'으로)
  *   1. 이 코드를 앱스 스크립트 편집기에 통째로 붙여넣고 저장
  *   2. 상단 [배포] > [배포 관리] > 연필(수정) > 버전: '새 버전' > [배포]
@@ -16,6 +19,12 @@ const TOKEN = 'wd2027-k8Xp3mQ7vNa2LrT9';   // script.js 의 CFG.guestbookToken �
 const ADMIN_PW = '';                        // 관리자 삭제 비밀번호 (비우면 사용 안 함)
 const SHEET_NAME = '청첩장 방명록';
 const MAX_NAME = 12, MAX_MSG = 300;
+
+// 처음 한 번 실행: 권한 허용 + 방명록 스프레드시트 만들기
+function setup() {
+  const sh = sheet_();
+  Logger.log('방명록 시트 준비 완료: ' + sh.getParent().getUrl());
+}
 
 function sheet_() {
   const props = PropertiesService.getScriptProperties();

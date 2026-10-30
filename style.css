@@ -1181,6 +1181,20 @@ body.locked {
   margin-bottom: 26px
 }
 
+/* 방명록 위 사진 (액자) */
+.frame {
+  background: #eee2c8;
+  padding: 14px;
+  margin: 0 8px 18px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .4)
+}
+
+.frame img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover
+}
+
 /* 가로로 넘기는 카드 목록 */
 .gb-list {
   display: flex;

@@ -63,7 +63,14 @@
   const ScrollLock = {
     y: 0,
     lock() { this.y = scrollY; document.body.style.top = `-${this.y}px`; document.body.classList.add('locked'); },
-    unlock() { document.body.classList.remove('locked'); document.body.style.top = ''; scrollTo(0, this.y); },
+    unlock() {
+      document.body.classList.remove('locked'); document.body.style.top = '';
+      // 부드러운 스크롤 설정 때문에 맨 위에서부터 내려오는 것처럼 보이지 않게, 원래 자리로 즉시 돌아감
+      const html = document.documentElement, prev = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      scrollTo(0, this.y);
+      requestAnimationFrame(() => { html.style.scrollBehavior = prev; });
+    },
   };
 
   // ===== 스크롤 등장 애니메이션 =====
