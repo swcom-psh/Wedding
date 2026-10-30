@@ -5,7 +5,7 @@
  *   CFG ............ 설정 (날짜, 장소, 업로드, BGM 등 — 보통 여기만 고치면 됨)
  *   util ........... 공통 도우미 ($, toast, 스크롤 잠금, 진동 등)
  *   Motion ......... 스크롤 등장 애니메이션 (순차 등장 / 종류 지정)
- *   Intro .......... 표지 등장 + 아래로 스크롤 안내
+ *   Intro .......... 표지 등장
  *   Gallery ........ 갤러리 목록 + 더보기
  *   Lightbox ....... 사진 크게 보기 (끌어서 넘기기·아래로 내려 닫기·뒤로가기로 닫기)
  *   Calendar ....... 달력 + 카운트다운
@@ -108,13 +108,6 @@
     const ready = () => intro.classList.add('ready');
     cover.complete ? requestAnimationFrame(ready) : cover.addEventListener('load', ready, { once: true });
     setTimeout(ready, 2500);   // 이미지가 늦어도 표지는 보이게
-    const hint = document.createElement('div');
-    hint.className = 'scroll-hint';
-    hint.setAttribute('aria-hidden', 'true');
-    hint.innerHTML = '<span>scroll</span><i></i>';
-    intro.appendChild(hint);
-    const onScroll = () => { if (scrollY > 40) { hint.classList.add('gone'); removeEventListener('scroll', onScroll); } };
-    addEventListener('scroll', onScroll, { passive: true });
   })();
 
   // ===== 갤러리 =====

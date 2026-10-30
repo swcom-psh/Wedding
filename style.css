@@ -996,54 +996,6 @@ img.fade-img.loaded {
   transform: none
 }
 
-.scroll-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 22px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--ink);
-  font-family: var(--script);
-  font-size: 15px;
-  opacity: 0;
-  transition: opacity .6s;
-  pointer-events: none
-}
-
-.intro.ready .scroll-hint {
-  opacity: .75;
-  transition-delay: 1.6s
-}
-
-.scroll-hint.gone {
-  opacity: 0 !important;
-  transition-delay: 0s !important
-}
-
-.scroll-hint i {
-  width: 12px;
-  height: 12px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  animation: hint 1.8s var(--ease-in-out) infinite
-}
-
-@keyframes hint {
-
-  0%,
-  100% {
-    translate: 0 -3px
-  }
-
-  50% {
-    translate: 0 4px
-  }
-}
-
 /* 갤러리 썸네일: 버튼 기본 스타일 정리 + 눌림 */
 button.stamp {
   border-style: solid;
