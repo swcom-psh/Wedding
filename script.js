@@ -676,9 +676,35 @@
     const fmt = (t) => { const d = new Date(t); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; };
 
     // 레이스, 편지지, 리본, 골드클립 등 다양한 감성 카드 템플릿을 순환하여 사용
-    const GB_KINDS = ['ribbon', 'letter', 'clip', 'lace', 'vintage', 'mini-ribbon', 'elegance', 'classic'];
-    function card(it, i) {
-      const kind = GB_KINDS[i % GB_KINDS.length];
+    // 레이스, 편지지, 리본, 골드클립 등 다양한 감성 카드 템플릿
+    // 방명록 글이 추가되어도 기존 글의 카드 배경 이미지가 바뀌지 않고 고정되도록 등록 순서 기반으로 영구 고정
+    const GB_KINDS = ['clip', 'letter', 'ribbon', 'lace', 'vintage', 'mini-ribbon', 'elegance', 'classic'];
+    const cardKindMap = new Map();
+    try {
+      const saved = JSON.parse(localStorage.getItem('gb_card_kinds') || '{}');
+      for (const [k, v] of Object.entries(saved)) cardKindMap.set(k, v);
+    } catch (_) {}
+
+    function updateCardKinds(list) {
+      const chrono = [...list].sort((a, b) => (a.time || 0) - (b.time || 0));
+      let changed = false;
+      chrono.forEach((it, idx) => {
+        if (!cardKindMap.has(it.id)) {
+          cardKindMap.set(it.id, GB_KINDS[idx % GB_KINDS.length]);
+          changed = true;
+        }
+      });
+      if (changed) {
+        try {
+          const obj = {};
+          cardKindMap.forEach((v, k) => { obj[k] = v; });
+          localStorage.setItem('gb_card_kinds', JSON.stringify(obj));
+        } catch (_) {}
+      }
+    }
+
+    function card(it) {
+      const kind = cardKindMap.get(it.id) || GB_KINDS[0];
       return `<article class="gb-card ${kind}" data-id="${esc(it.id)}">
         <button type="button" class="gb-del" aria-label="${esc(it.name)}님의 글 삭제">×</button>
         <div class="gb-body">
@@ -770,6 +796,7 @@
     }, { passive: false });
 
     function render() {
+      updateCardKinds(items);
       if (!items.length) {
         list.innerHTML = '<p class="gb-empty">첫 번째 축하 메시지를 남겨주세요 ♥</p>';
       } else {
