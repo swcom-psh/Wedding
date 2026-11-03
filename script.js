@@ -964,18 +964,43 @@
   })();
 
   fadeInImages();
-// 모바일 청첩장 본문 페이지의 의도치 않은 전체 화면 확대/축소(핀치 줌) 방지
-  document.addEventListener('gesturestart', (e) => {
-    if (!e.target.closest('#lightbox')) e.preventDefault();
+  // 모바일 청첩장 본문 페이지의 전체 화면 확대/축소(핀치 줌 및 더블 탭 확대) 차단
+  // (갤러리 라이트박스 #lightbox 내부의 사진 확대만 독립적으로 허용)
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((type) => {
+    document.addEventListener(type, (e) => {
+      if (!e.target.closest('#lightbox')) e.preventDefault();
+    }, { passive: false });
+  });
+
+  // 두 손가락 터치(핀치) 시작 즉시 차단
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length > 1 && !e.target.closest('#lightbox')) {
+      e.preventDefault();
+    }
   }, { passive: false });
-  document.addEventListener('gesturechange', (e) => {
-    if (!e.target.closest('#lightbox')) e.preventDefault();
-  }, { passive: false });
-  document.addEventListener('gestureend', (e) => {
-    if (!e.target.closest('#lightbox')) e.preventDefault();
-  }, { passive: false });
+
+  // 두 손가락 터치 이동(핀치 줌 제스처) 차단
   document.addEventListener('touchmove', (e) => {
     if (e.touches && e.touches.length > 1 && !e.target.closest('#lightbox')) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 모바일 더블 탭 줌 방지 (300ms 이내 연속 탭)
+  let lastTouchEndTime = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEndTime <= 300) {
+      if (!e.target.closest('#lightbox, input, textarea, button, a, label')) {
+        e.preventDefault();
+      }
+    }
+    lastTouchEndTime = now;
+  }, { passive: false });
+
+  // PC/트랙패드 Ctrl+휠 확대 차단
+  document.addEventListener('wheel', (e) => {
+    if (e.ctrlKey && !e.target.closest('#lightbox')) {
       e.preventDefault();
     }
   }, { passive: false });

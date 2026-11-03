@@ -24,12 +24,12 @@
 
 html {
   scroll-behavior: smooth;
-  touch-action: manipulation
+  touch-action: pan-y
 }
 
 body {
   word-break: keep-all;
-  touch-action: manipulation;
+  touch-action: pan-y;
   background: #2a0a10;
   font-family: var(--serif);
   color: var(--ink);
@@ -47,7 +47,8 @@ img {
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, .4)
+  box-shadow: 0 0 40px rgba(0, 0, 0, .4);
+  touch-action: pan-y;
 }
 
 .sec {
