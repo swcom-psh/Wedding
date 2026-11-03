@@ -7,7 +7,7 @@
   --ink: #5a1320;
   --light: #f4e9d8;
   --serif: 'Gowun Batang', 'Nanum Myeongjo', serif;
-  --hand: 'Gaegu', 'Nanum Pen Script', cursive;
+  --hand: 'Nanum Pen Script', 'Gaegu', cursive;
   --script: 'Nothing You Could Do', 'Reenie Beanie', cursive;
   /* 애니메이션 공통 값: 여기만 바꾸면 전체 속도·느낌이 바뀜 */
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -1299,7 +1299,12 @@ body.locked {
   background: center / 100% 100% no-repeat;
   filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35));
   text-align: center;
-  color: #3a2a20
+  color: #3a2a20;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .gb-card.lace {
@@ -1360,7 +1365,11 @@ body.locked {
   position: absolute;
   display: flex;
   flex-direction: column;
-  overflow: hidden
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .lace .gb-body {
@@ -1372,7 +1381,7 @@ body.locked {
 }
 
 .ribbon .gb-body, .card-1 .gb-body {
-  inset: 16% 14% 14%
+  inset: 22% 14% 13%
 }
 
 .clip .gb-body, .card-2 .gb-body {
@@ -1388,40 +1397,47 @@ body.locked {
 }
 
 .elegance .gb-body, .card-7 .gb-body {
-  inset: 18% 13% 13%
+  inset: 22% 13% 13%
 }
 
 .classic .gb-body, .card-9 .gb-body {
-  inset: 18% 15% 15%
+  inset: 21% 15% 15%
 }
 
 .gb-text {
   flex: 1;
   overflow: hidden;
-  font-family: var(--hand);
-  font-size: 7.4cqw;
-  font-weight: 700;
+  font-family: 'Nanum Pen Script', var(--hand);
+  font-size: 8.6cqw;
+  font-weight: 400;
   line-height: 1.5;
   text-align: left;
   word-break: break-all;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 8
+  -webkit-line-clamp: 7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .letter .gb-text {
-  -webkit-line-clamp: 9
+  -webkit-line-clamp: 8
 }
 
 .gb-name {
-  margin-top: 6%;
-  font-size: 5.4cqw;
-  font-weight: 700
+  margin-top: 4%;
+  font-family: 'Nanum Pen Script', var(--hand);
+  font-size: 6.6cqw;
+  font-weight: 400;
+  color: #4a3427;
+  letter-spacing: 0.04em;
 }
 
 .gb-date {
-  font-size: 4.4cqw;
-  opacity: .6
+  font-family: var(--serif);
+  font-size: 4cqw;
+  opacity: .65;
+  letter-spacing: 0.02em;
 }
 
 .gb-del {
