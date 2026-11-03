@@ -23,11 +23,13 @@
 }
 
 html {
-  scroll-behavior: smooth
+  scroll-behavior: smooth;
+  touch-action: manipulation
 }
 
 body {
   word-break: keep-all;
+  touch-action: manipulation;
   background: #2a0a10;
   font-family: var(--serif);
   color: var(--ink);
@@ -968,6 +970,8 @@ button.stamp:active {
   height: 100%;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  touch-action: none;
   transform-origin: var(--ox, 50%) var(--oy, 50%);
   transition: transform .4s var(--ease)
 }
@@ -982,7 +986,10 @@ button.stamp:active {
   max-height: 86dvh;
   object-fit: contain;
   -webkit-user-drag: none;
-  pointer-events: none
+  user-select: none;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform
 }
 
 #lightbox img.slide-l {

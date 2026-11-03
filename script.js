@@ -155,14 +155,46 @@
     return { thumbs: () => $$('.stamp', box) };
   })();
 
-  // ===== 사진 크게 보기 =====
+  // ===== 사진 크게 보기 (핀치 줌 · 더블 탭 줌 · 넘기기 · 끌어서 닫기) =====
   const Lightbox = (() => {
     const lb = $('lightbox'), stage = lb.querySelector('.lb-stage'), img = lb.querySelector('img'), count = lb.querySelector('.lb-count');
     let cur = 0, isOpen = false;
 
+    // 줌 및 패닝 상태
+    let scale = 1, panX = 0, panY = 0;
+    let isPinching = false, pinchStartDist = 0, pinchStartScale = 1;
+    let lastTapTime = 0;
+
+    function applyTransform(withTransition = false) {
+      img.style.transition = withTransition ? 'transform .28s cubic-bezier(.22, 1, .36, 1)' : 'none';
+      img.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${scale})`;
+    }
+
+    function resetZoom(withTransition = false) {
+      scale = 1;
+      panX = 0;
+      panY = 0;
+      applyTransform(withTransition);
+    }
+
+    function clampPan() {
+      if (scale <= 1) {
+        panX = 0;
+        panY = 0;
+        return;
+      }
+      const sW = stage.clientWidth;
+      const sH = stage.clientHeight;
+      const maxPanX = Math.max(0, (sW * scale - sW) / 2);
+      const maxPanY = Math.max(0, (sH * scale - sH) / 2);
+      panX = clamp(panX, -maxPanX, maxPanX);
+      panY = clamp(panY, -maxPanY, maxPanY);
+    }
+
     const preload = (i) => { const p = photos[(i + photos.length) % photos.length]; if (p) new Image().src = fullSrc(p); };
 
     function show(i, dir = 0) {
+      resetZoom(false);
       cur = (i + photos.length) % photos.length;
       const src = fullSrc(photos[cur]);
       count.textContent = `${cur + 1} / ${photos.length}`;
@@ -175,6 +207,7 @@
     function open(i, fromEl) {
       if (isOpen) return;
       isOpen = true;
+      resetZoom(false);
       show(i);
       // 누른 썸네일 위치에서 커지듯이 열리게
       if (fromEl) {
@@ -194,6 +227,7 @@
       lb.classList.remove('open');
       lb.setAttribute('aria-hidden', 'true');
       stage.style.transform = ''; lb.style.removeProperty('--bg');
+      resetZoom(false);
       ScrollLock.unlock();
       if (!fromPop && history.state && history.state.lb) history.back();
       const t = Gallery.thumbs()[cur]; if (t) t.focus({ preventScroll: true });
@@ -203,40 +237,240 @@
     lb.querySelector('.lb-close').addEventListener('click', (e) => { e.stopPropagation(); close(); });
     lb.querySelector('.lb-prev').addEventListener('click', (e) => { e.stopPropagation(); show(cur - 1, -1); });
     lb.querySelector('.lb-next').addEventListener('click', (e) => { e.stopPropagation(); show(cur + 1, 1); });
-    lb.addEventListener('click', (e) => { if (e.target === lb || e.target === stage) close(); });
 
-    // 확대 제스처 차단 (iOS Safari 포함)
-    ['gesturestart', 'gesturechange', 'gestureend'].forEach((t) => lb.addEventListener(t, (e) => e.preventDefault()));
-    lb.addEventListener('dblclick', (e) => e.preventDefault());
-    lb.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-
-    // 끌어서 넘기기 / 아래로 끌어 닫기
-    let sx = 0, sy = 0, dx = 0, dy = 0, drag = false, axis = '';
-    lb.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('button')) return;
-      drag = true; axis = ''; sx = e.clientX; sy = e.clientY; dx = dy = 0;
-      stage.style.transition = 'none';
+    // iOS 사파리 브라우저 기본 확대 제스처 차단 (대신 커스텀 핀치 줌 적용)
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((t) => {
+      lb.addEventListener(t, (e) => e.preventDefault(), { passive: false });
     });
-    lb.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      dx = e.clientX - sx; dy = e.clientY - sy;
-      if (!axis && Math.hypot(dx, dy) > 8) axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if (axis === 'x') stage.style.transform = `translateX(${dx}px)`;
-      if (axis === 'y' && dy > 0) {
-        stage.style.transform = `translateY(${dy}px) scale(${1 - Math.min(dy / 1500, .15)})`;
-        lb.style.setProperty('--bg', String(clamp(.92 - dy / 600, .3, .92)));
+
+    // 터치 이벤트: 핀치 줌, 더블 탭 확대/축소, 줌 시 패닝, 일반 시 좌우 넘기기 및 아래로 닫기
+    let touchStartX = 0, touchStartY = 0;
+    let startPanX = 0, startPanY = 0;
+    let stageSwipeX = 0, stageSwipeY = 0, isStageDrag = false, stageAxis = '';
+
+    stage.addEventListener('touchstart', (e) => {
+      if (e.target.closest('button')) return;
+
+      if (e.touches.length === 2) {
+        // 두 손가락 핀치 줌 시작
+        isPinching = true;
+        isStageDrag = false;
+        stage.style.transition = 'none';
+        const t0 = e.touches[0], t1 = e.touches[1];
+        pinchStartDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+        pinchStartScale = scale;
+        startPanX = panX;
+        startPanY = panY;
+        return;
+      }
+
+      if (e.touches.length === 1) {
+        const now = Date.now();
+        const t = e.touches[0];
+
+        // 더블 탭 확대 / 축소 토글
+        if (now - lastTapTime < 320) {
+          e.preventDefault();
+          lastTapTime = 0;
+          if (scale > 1.1) {
+            resetZoom(true);
+          } else {
+            const rect = stage.getBoundingClientRect();
+            const tapX = t.clientX - rect.left - rect.width / 2;
+            const tapY = t.clientY - rect.top - rect.height / 2;
+            scale = 2.5;
+            panX = -tapX * 1.5;
+            panY = -tapY * 1.5;
+            clampPan();
+            applyTransform(true);
+          }
+          return;
+        }
+        lastTapTime = now;
+
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        startPanX = panX;
+        startPanY = panY;
+        stageSwipeX = 0;
+        stageSwipeY = 0;
+        stageAxis = '';
+        isStageDrag = true;
+        stage.style.transition = 'none';
+      }
+    }, { passive: false });
+
+    stage.addEventListener('touchmove', (e) => {
+      if (e.target.closest('button')) return;
+
+      if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+        if (pinchStartDist > 0) {
+          scale = clamp(pinchStartScale * (dist / pinchStartDist), 0.8, 4.5);
+          applyTransform(false);
+        }
+        return;
+      }
+
+      if (e.touches.length === 1 && isStageDrag) {
+        const t = e.touches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+
+        if (scale > 1.08) {
+          // 확대 상태: 사진 내부 패닝 이동
+          e.preventDefault();
+          panX = startPanX + dx;
+          panY = startPanY + dy;
+          clampPan();
+          applyTransform(false);
+        } else {
+          // 기본 1x 배율 상태: 좌우 스와이프 넘기기 또는 아래로 끌어 닫기
+          if (!stageAxis && Math.hypot(dx, dy) > 8) {
+            stageAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+          }
+          if (stageAxis === 'x') {
+            e.preventDefault();
+            stage.style.transform = `translateX(${dx}px)`;
+            stageSwipeX = dx;
+          } else if (stageAxis === 'y' && dy > 0) {
+            e.preventDefault();
+            stage.style.transform = `translateY(${dy}px) scale(${1 - Math.min(dy / 1500, .15)})`;
+            lb.style.setProperty('--bg', String(clamp(.92 - dy / 600, .3, .92)));
+            stageSwipeY = dy;
+          }
+        }
+      }
+    }, { passive: false });
+
+    const handleTouchEnd = () => {
+      if (isPinching) {
+        isPinching = false;
+        if (scale < 1.08) {
+          resetZoom(true);
+        } else if (scale > 4.0) {
+          scale = 4.0;
+          clampPan();
+          applyTransform(true);
+        } else {
+          clampPan();
+          applyTransform(true);
+        }
+        return;
+      }
+
+      if (isStageDrag) {
+        isStageDrag = false;
+        stage.style.transition = '';
+
+        if (scale <= 1.08) {
+          if (stageAxis === 'x' && Math.abs(stageSwipeX) > 50) {
+            show(cur + (stageSwipeX < 0 ? 1 : -1), stageSwipeX < 0 ? 1 : -1);
+          } else if (stageAxis === 'y' && stageSwipeY > 110) {
+            close();
+            return;
+          }
+          stage.style.transform = '';
+          lb.style.removeProperty('--bg');
+        } else {
+          clampPan();
+          applyTransform(true);
+        }
+      }
+    };
+
+    stage.addEventListener('touchend', handleTouchEnd);
+    stage.addEventListener('touchcancel', handleTouchEnd);
+
+    // PC 데스크톱 지원: 더블 클릭 확대, 마우스 휠 줌, 마우스 드래그
+    stage.addEventListener('dblclick', (e) => {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      if (scale > 1.1) {
+        resetZoom(true);
+      } else {
+        const rect = stage.getBoundingClientRect();
+        const tapX = e.clientX - rect.left - rect.width / 2;
+        const tapY = e.clientY - rect.top - rect.height / 2;
+        scale = 2.5;
+        panX = -tapX * 1.5;
+        panY = -tapY * 1.5;
+        clampPan();
+        applyTransform(true);
       }
     });
-    const end = () => {
-      if (!drag) return;
-      drag = false;
+
+    stage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.3 : -0.3;
+      scale = clamp(scale + delta, 1.0, 4.0);
+      if (scale <= 1.05) {
+        resetZoom(true);
+      } else {
+        clampPan();
+        applyTransform(true);
+      }
+    }, { passive: false });
+
+    let mDown = false, mStartX = 0, mStartY = 0, mPanStartX = 0, mPanStartY = 0, mDragX = 0, mDragY = 0, mAxis = '';
+    stage.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button')) return;
+      mDown = true;
+      mStartX = e.clientX;
+      mStartY = e.clientY;
+      mPanStartX = panX;
+      mPanStartY = panY;
+      mDragX = 0;
+      mDragY = 0;
+      mAxis = '';
+      stage.style.transition = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!mDown) return;
+      const dx = e.clientX - mStartX;
+      const dy = e.clientY - mStartY;
+      mDragX = dx;
+      mDragY = dy;
+
+      if (scale > 1.08) {
+        panX = mPanStartX + dx;
+        panY = mPanStartY + dy;
+        clampPan();
+        applyTransform(false);
+      } else {
+        if (!mAxis && Math.hypot(dx, dy) > 8) mAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        if (mAxis === 'x') stage.style.transform = `translateX(${dx}px)`;
+        if (mAxis === 'y' && dy > 0) {
+          stage.style.transform = `translateY(${dy}px) scale(${1 - Math.min(dy / 1500, .15)})`;
+          lb.style.setProperty('--bg', String(clamp(.92 - dy / 600, .3, .92)));
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!mDown) return;
+      mDown = false;
       stage.style.transition = '';
-      if (axis === 'x' && Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
-      if (axis === 'y' && dy > 110) { close(); return; }
-      stage.style.transform = ''; lb.style.removeProperty('--bg');
-    };
-    lb.addEventListener('pointerup', end);
-    lb.addEventListener('pointercancel', end);
+      if (scale <= 1.08) {
+        if (mAxis === 'x' && Math.abs(mDragX) > 50) show(cur + (mDragX < 0 ? 1 : -1), mDragX < 0 ? 1 : -1);
+        else if (mAxis === 'y' && mDragY > 110) { close(); return; }
+        stage.style.transform = '';
+        lb.style.removeProperty('--bg');
+      } else {
+        clampPan();
+        applyTransform(true);
+      }
+    });
+
+    // 배경 클릭 시 닫기 (확대되지 않은 상태일 때만)
+    lb.addEventListener('click', (e) => {
+      if ((e.target === lb || e.target === stage) && scale <= 1.08 && !stageSwipeX && !stageSwipeY) {
+        close();
+      }
+    });
 
     addEventListener('keydown', (e) => {
       if (!isOpen) return;
@@ -677,4 +911,19 @@
   })();
 
   fadeInImages();
+// 모바일 청첩장 본문 페이지의 의도치 않은 전체 화면 확대/축소(핀치 줌) 방지
+  document.addEventListener('gesturestart', (e) => {
+    if (!e.target.closest('#lightbox')) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gesturechange', (e) => {
+    if (!e.target.closest('#lightbox')) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gestureend', (e) => {
+    if (!e.target.closest('#lightbox')) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 1 && !e.target.closest('#lightbox')) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 })();
