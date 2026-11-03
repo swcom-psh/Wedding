@@ -888,48 +888,74 @@
   })();
 
   // ===== 배경음악 =====
-  // 브라우저는 소리 자동재생을 막으므로, 처음 화면을 터치/클릭하는 순간 재생을 시작해요.
+  // 페이지 진입 시 자동재생 시도 및 모바일 첫 터치/스크롤 즉시 재생
   (function Bgm() {
     if (!CFG.bgm) return;
     const a = $('bgm'), btn = $('bgm-btn');
-    const TARGET = .7;
-    a.src = CFG.bgm; a.volume = 0; btn.hidden = false;
+    const TARGET = .65;
+    if (!a.src || !a.src.includes('audio/bgm.m4a')) a.src = CFG.bgm;
+    a.volume = TARGET;
+    btn.hidden = false;
     let wantPlay = true, started = false, resume = false;
 
-    // 갑자기 크게 나오지 않도록 서서히 키우고, 끌 때도 서서히 줄임
-    function fade(to, ms = 900, then) {
-      if (reduceMotion) { a.volume = to; then && then(); return; }
-      const from = a.volume, t0 = performance.now();
-      cancelAnimationFrame(a._raf);
-      const step = (t) => {
-        const k = clamp((t - t0) / ms, 0, 1);
-        a.volume = from + (to - from) * k;
-        k < 1 ? (a._raf = requestAnimationFrame(step)) : then && then();
-      };
-      a._raf = requestAnimationFrame(step);
-    }
-    const play = () => a.play().then(() => { started = true; cleanup(); fade(TARGET); });
-    const sync = () => btn.classList.toggle('on', !a.paused);
-    a.addEventListener('play', sync); a.addEventListener('pause', sync);
+    const sync = () => {
+      btn.classList.toggle('on', !a.paused);
+      if (!a.paused) started = true;
+    };
+    a.addEventListener('play', sync);
+    a.addEventListener('pause', sync);
 
-    const evs = ['pointerdown', 'touchend', 'click', 'keydown'];
-    const start = (e) => { if (started || !wantPlay || (e && e.target.closest('#bgm-btn'))) return; play().catch(() => { }); };
-    const cleanup = () => evs.forEach((t) => document.removeEventListener(t, start, true));
-    evs.forEach((t) => document.addEventListener(t, start, true));
-    play().catch(() => { });   // 자동재생이 허용되는 환경이면 바로 재생
+    function play() {
+      if (started && !a.paused) return Promise.resolve();
+      a.volume = TARGET;
+      return a.play().then(() => {
+        started = true;
+        cleanup();
+        sync();
+      });
+    }
+
+    const evs = ['touchstart', 'pointerdown', 'scroll', 'wheel', 'touchmove', 'keydown', 'click'];
+    const onInteract = (e) => {
+      if (started || !wantPlay || (e && e.target.closest('#bgm-btn'))) return;
+      play().catch(() => { });
+    };
+    const cleanup = () => {
+      evs.forEach((t) => window.removeEventListener(t, onInteract, { capture: true, passive: true }));
+      evs.forEach((t) => document.removeEventListener(t, onInteract, { capture: true, passive: true }));
+    };
+    evs.forEach((t) => window.addEventListener(t, onInteract, { capture: true, passive: true }));
+    evs.forEach((t) => document.addEventListener(t, onInteract, { capture: true, passive: true }));
+
+    // 1) 즉시 자동재생 시도 (자동재생 허용 환경 / 웹뷰)
+    play().catch(() => { });
+
+    // 2) 로드 완료 및 페이지 표시 시점에 재시도
+    window.addEventListener('load', () => { if (!started) play().catch(() => { }); }, { once: true });
+    window.addEventListener('pageshow', () => { if (!started) play().catch(() => { }); }, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { if (!started) play().catch(() => { }); }, { once: true });
+    document.addEventListener('WeixinJSBridgeReady', () => { if (!started) play().catch(() => { }); }, { once: true });
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       haptic();
-      if (a.paused) { wantPlay = true; play().catch(() => { }); }
-      else { wantPlay = false; fade(0, 500, () => a.pause()); }
+      if (a.paused) {
+        wantPlay = true;
+        a.volume = TARGET;
+        play().catch(() => { });
+      } else {
+        wantPlay = false;
+        a.pause();
+      }
     });
-    // 같은 청첩장을 탭 여러 개로 열어도 한 곳에서만 재생 (다른 탭이 재생을 시작하면 이 탭은 멈춤)
+
+    // 같은 청첩장을 탭 여러 개로 열어도 한 곳에서만 재생
     if ('BroadcastChannel' in window) {
       const ch = new BroadcastChannel('wedding-bgm'), me = Math.random().toString(36).slice(2);
       a.addEventListener('play', () => ch.postMessage(me));
-      ch.onmessage = (e) => { if (e.data !== me && !a.paused) { resume = false; cancelAnimationFrame(a._raf); a.pause(); } };
+      ch.onmessage = (e) => { if (e.data !== me && !a.paused) { resume = false; a.pause(); } };
     }
+
     // 홈 화면으로 나가거나 탭을 바꾸면 멈췄다가, 돌아오면 이어서 재생
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { resume = !a.paused; a.pause(); }
