@@ -34,7 +34,7 @@
     // 방명록 저장소 (구글 앱스 스크립트 웹 앱 — apps-script/Code.gs)
     guestbookEndpoint: 'https://script.google.com/macros/s/AKfycbzzSt8YDTWCB1wTmfj0hbjqtKirou_Qspla-VR3QOqoH0yQNsniYpVhhJhPmu3DjOLRVA/exec',
     guestbookToken: 'wd2027-k8Xp3mQ7vNa2LrT9', // apps-script/Code.gs 의 TOKEN 과 같은 값
-    bgm: 'audio/bgm.m4a',                      // 배경음악 파일 (비우면 버튼 숨김)
+    bgm: 'audio/bgm.m4a?v=2',                      // 배경음악 파일 (비우면 버튼 숨김)
     galleryFirst: 12,                          // 갤러리 처음에 보여줄 사진 수 (3장 × 4줄)
     sliderAutoMs: 5000,                        // 안내사항 카드 자동 넘김 간격 (0이면 끔)
   };
