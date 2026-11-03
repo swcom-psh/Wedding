@@ -734,14 +734,17 @@ img {
 
 /* thanks */
 .thanks-msg {
-  font-size: 18px;
-  line-height: 2.1
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 2.1;
+  letter-spacing: -0.01em;
 }
 
 .sign {
   margin-top: 36px;
   font-size: 20px;
-  font-weight: 700
+  font-weight: 400;
+  letter-spacing: 0.05em;
 }
 
 footer {
