@@ -431,18 +431,20 @@
   // ===== 방명록 =====
   (function Guestbook() {
     const list = $('gb-list'), grid = $('gb-grid');
+    const prevBtn = $('gb-prev'), nextBtn = $('gb-next');
     const writeSheet = $('gb-write-sheet'), allSheet = $('gb-all-sheet'), delSheet = $('gb-del-sheet');
     const form = $('gb-form'), delForm = $('gb-del-form');
     const F = form.elements, D = delForm.elements;   // form.name 은 폼 자체 이름이라 입력칸은 elements 로 접근
-    const PREVIEW = 6;              // 본문에 가로로 보여줄 글 수 (나머지는 전체보기)
+    const PREVIEW = 20;             // 본문에 가로로 보여줄 글 수
     let items = [], delId = null;
 
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fmt = (t) => { const d = new Date(t); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; };
 
-    // 레이스 카드와 편지지 카드를 번갈아 사용
+    // 레이스, 편지지, 리본, 골드클립 등 다양한 감성 카드 템플릿을 순환하여 사용
+    const GB_KINDS = ['ribbon', 'letter', 'clip', 'lace', 'vintage', 'mini-ribbon', 'elegance', 'classic'];
     function card(it, i) {
-      const kind = i % 2 ? 'letter' : 'lace';
+      const kind = GB_KINDS[i % GB_KINDS.length];
       return `<article class="gb-card ${kind}" data-id="${esc(it.id)}">
         <button type="button" class="gb-del" aria-label="${esc(it.name)}님의 글 삭제">×</button>
         <div class="gb-body">
@@ -453,6 +455,86 @@
       </article>`;
     }
 
+    // 좌우 화살표 버튼 가시성 및 활성화 상태 갱신
+    function updateNav() {
+      if (!prevBtn || !nextBtn) return;
+      const cards = list.querySelectorAll('.gb-card');
+      if (cards.length <= 1) {
+        prevBtn.hidden = true;
+        nextBtn.hidden = true;
+        return;
+      }
+      prevBtn.hidden = false;
+      nextBtn.hidden = false;
+      const maxScroll = Math.max(0, list.scrollWidth - list.clientWidth - 4);
+      const isStart = list.scrollLeft <= 4;
+      const isEnd = list.scrollLeft >= maxScroll;
+      prevBtn.disabled = isStart;
+      nextBtn.disabled = isEnd;
+      prevBtn.setAttribute('aria-disabled', String(isStart));
+      nextBtn.setAttribute('aria-disabled', String(isEnd));
+    }
+
+    // 화살표 버튼 클릭 시 카드 1장 너비만큼 부드럽게 스크롤
+    function scrollStep(dir) {
+      const firstCard = list.querySelector('.gb-card');
+      const step = firstCard ? (firstCard.offsetWidth + 14) : 260;
+      list.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+      haptic(10);
+    }
+    if (prevBtn) prevBtn.addEventListener('click', () => scrollStep(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => scrollStep(1));
+    list.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav);
+
+    // 마우스 드래그 및 터치 스와이프로 가로 넘기기
+    let isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
+    list.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.gb-del')) return;
+      isDown = true;
+      hasDragged = false;
+      startX = e.clientX;
+      scrollStart = list.scrollLeft;
+      try { list.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    list.addEventListener('pointermove', (e) => {
+      if (!isDown) return;
+      const dist = e.clientX - startX;
+      if (Math.abs(dist) > 5) {
+        hasDragged = true;
+        list.classList.add('dragging');
+      }
+      list.scrollLeft = scrollStart - dist;
+    });
+    const endDrag = (e) => {
+      if (!isDown) return;
+      isDown = false;
+      list.classList.remove('dragging');
+      try { list.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+    list.addEventListener('pointerup', endDrag);
+    list.addEventListener('pointercancel', endDrag);
+    // 드래그 중 실수로 카드 내 클릭 방지
+    list.addEventListener('click', (e) => {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
+    // PC 마우스 휠로 가로 스크롤
+    list.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.deltaY !== 0) {
+        const canLeft = e.deltaY < 0 && list.scrollLeft > 2;
+        const canRight = e.deltaY > 0 && list.scrollLeft < list.scrollWidth - list.clientWidth - 2;
+        if (canLeft || canRight) {
+          e.preventDefault();
+          list.scrollBy({ left: e.deltaY * 1.5, behavior: 'auto' });
+        }
+      }
+    }, { passive: false });
+
     function render() {
       if (!items.length) {
         list.innerHTML = '<p class="gb-empty">첫 번째 축하 메시지를 남겨주세요 ♥</p>';
@@ -462,6 +544,7 @@
       }
       grid.innerHTML = items.length ? items.map(card).join('') : '<p class="gb-empty dark">아직 남겨진 글이 없어요</p>';
       $('gb-all').hidden = items.length <= 1;
+      requestAnimationFrame(updateNav);
     }
 
     async function load() {

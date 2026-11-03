@@ -735,7 +735,6 @@ img {
 /* thanks */
 .thanks-msg {
   font-size: 18px;
-  font-weight: 700;
   line-height: 2.1
 }
 
@@ -1195,17 +1194,32 @@ body.locked {
   object-fit: cover
 }
 
-/* 가로로 넘기는 카드 목록 */
+/* 가로로 넘기는 카드 슬라이더 래퍼 & 목록 */
+.gb-slider-wrap {
+  position: relative;
+  margin: 0 -24px;
+}
+
 .gb-list {
   display: flex;
   gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  margin: 0 -24px;
+  scroll-behavior: smooth;
+  margin: 0;
   padding: 18px 24px 26px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain
+  overscroll-behavior-x: contain;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.gb-list.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  scroll-snap-type: none;
 }
 
 .gb-list::-webkit-scrollbar {
@@ -1214,7 +1228,56 @@ body.locked {
 
 .gb-list .gb-card {
   flex: 0 0 66%;
-  scroll-snap-align: center
+  scroll-snap-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 방명록 좌우 화살표 버튼 */
+.gb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  background: rgba(234, 216, 184, 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--wine);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.gb-nav.prev {
+  left: 8px;
+}
+
+.gb-nav.next {
+  right: 8px;
+}
+
+.gb-nav:hover {
+  background: #f7edd9;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.gb-nav:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.gb-nav:disabled,
+.gb-nav[aria-disabled="true"] {
+  opacity: 0.18;
+  cursor: default;
+  pointer-events: none;
 }
 
 .gb-empty {
@@ -1229,7 +1292,7 @@ body.locked {
   color: var(--ink)
 }
 
-/* 카드: 레이스(1번 템플릿) / 편지지 + 왁스 씰(2번 템플릿) */
+/* 카드: 레이스 / 편지지 / 리본 / 클립 / 빈티지 등 다양한 템플릿 */
 .gb-card {
   position: relative;
   container-type: inline-size;
@@ -1251,6 +1314,47 @@ body.locked {
   transform: rotate(1deg)
 }
 
+.gb-card.ribbon, .gb-card.card-1 {
+  aspect-ratio: 720 / 1102;
+  background-image: url(img/gb-ribbon.png);
+  transform: rotate(-1.2deg)
+}
+
+.gb-card.clip, .gb-card.card-2 {
+  aspect-ratio: 720 / 1216;
+  background-image: url(img/gb-clip.png);
+  transform: rotate(1deg)
+}
+
+.gb-card.vintage, .gb-card.card-3 {
+  aspect-ratio: 720 / 1108;
+  background-image: url(img/gb-vintage.png);
+  transform: rotate(-0.8deg)
+}
+
+.gb-card.mini-ribbon, .gb-card.card-4 {
+  aspect-ratio: 720 / 1097;
+  background-image: url(img/gb-mini-ribbon.png);
+  transform: rotate(0.8deg)
+}
+
+.gb-card.elegance, .gb-card.card-7 {
+  aspect-ratio: 720 / 1141;
+  background-image: url(img/gb-elegance.png);
+  transform: rotate(-1.2deg)
+}
+
+.gb-card.classic, .gb-card.card-9 {
+  aspect-ratio: 720 / 1083;
+  background-image: url(img/gb-classic.png);
+  transform: rotate(1.2deg)
+}
+
+.gb-card.card-5 { aspect-ratio: 720 / 591; background-image: url(img/gb-card-5.png); }
+.gb-card.card-6 { aspect-ratio: 720 / 468; background-image: url(img/gb-card-6.png); }
+.gb-card.card-8 { aspect-ratio: 720 / 1095; background-image: url(img/gb-card-8.png); }
+.gb-card.card-10 { aspect-ratio: 720 / 944; background-image: url(img/gb-card-10.png); }
+
 /* 종이 부분 안쪽에만 글이 들어가게 */
 .gb-body {
   position: absolute;
@@ -1265,6 +1369,30 @@ body.locked {
 
 .letter .gb-body {
   inset: 19% 11% 8%
+}
+
+.ribbon .gb-body, .card-1 .gb-body {
+  inset: 16% 14% 14%
+}
+
+.clip .gb-body, .card-2 .gb-body {
+  inset: 23% 13% 12%
+}
+
+.vintage .gb-body, .card-3 .gb-body {
+  inset: 15% 13% 14%
+}
+
+.mini-ribbon .gb-body, .card-4 .gb-body {
+  inset: 15% 13% 14%
+}
+
+.elegance .gb-body, .card-7 .gb-body {
+  inset: 18% 13% 13%
+}
+
+.classic .gb-body, .card-9 .gb-body {
+  inset: 18% 15% 15%
 }
 
 .gb-text {
@@ -1310,7 +1438,12 @@ body.locked {
   cursor: pointer
 }
 
-.lace .gb-del {
+.lace .gb-del,
+.ribbon .gb-del,
+.vintage .gb-del,
+.mini-ribbon .gb-del,
+.elegance .gb-del,
+.classic .gb-del {
   top: 3%;
   right: 4%;
   background: rgba(244, 239, 230, .9)
@@ -1319,6 +1452,12 @@ body.locked {
 .letter .gb-del {
   top: 12.5%;
   right: 3%
+}
+
+.clip .gb-del {
+  top: 11%;
+  right: 4%;
+  background: rgba(244, 239, 230, .9)
 }
 
 /* 작성하기 / 전체보기 */
