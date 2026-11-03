@@ -2,3 +2,8 @@
 배경/
 .claude/
 배경음악/
+tools/fonts/
+tools/mockups/
+tools/mockups_clean/
+__pycache__/
+*/__pycache__/
