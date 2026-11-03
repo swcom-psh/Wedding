@@ -224,11 +224,11 @@ img {
 .tapes {
   position: relative;
   container-type: inline-size;
-  margin: 20px -10px 20px
+  margin: 16px -10px 10px;
 }
 
 .tapes img {
-  width: 100%
+  width: 100%;
 }
 
 .tapes p {
@@ -240,12 +240,21 @@ img {
   font-weight: 700;
   font-size: 5.4cqw;
   color: #2c1a12;
-  line-height: 1
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tapes p.long {
+  font-size: 4.8cqw;
+  letter-spacing: -0.015em;
 }
 
 .msg {
-  font-size: 19px;
-  line-height: 2
+  font-size: 18px;
+  line-height: 1.85;
+  margin: 18px auto 0;
+  word-break: keep-all;
 }
 
 .wide-photo {
