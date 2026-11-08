@@ -250,6 +250,12 @@ img {
   letter-spacing: -0.015em;
 }
 
+.tapes p.source {
+  font-size: 4.4cqw;
+  color: #4a3429;
+  letter-spacing: 0.02em;
+}
+
 .msg {
   font-size: 18px;
   line-height: 1.85;
