@@ -1,12 +1,3 @@
-@font-face {
-  font-family: 'Kyobo2022';
-  src: url('fonts/KyoboHandwriting2022khn.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/KyoboHandwriting2022khn.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --wine: #6d1620;
   --wine-d: #4e0e17;
@@ -16,7 +7,7 @@
   --ink: #5a1320;
   --light: #f4e9d8;
   --serif: 'Gowun Batang', 'Nanum Myeongjo', serif;
-  --hand: 'Kyobo2022', 'Nanum Pen Script', 'Gaegu', cursive;
+  --hand: 'Nanum Pen Script', 'Gaegu', cursive;
   --script: 'Nothing You Could Do', 'Reenie Beanie', cursive;
   /* 애니메이션 공통 값: 여기만 바꾸면 전체 속도·느낌이 바뀜 */
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -194,63 +185,16 @@ img {
   filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35))
 }
 
-.card-date-d {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 35%;
-  transform: translateY(-50%);
-  text-align: center;
-  font-family: var(--hand);
-  font-size: 6.2cqw;
-  color: #2f2118;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.card-date-t {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 48%;
-  transform: translateY(-50%);
-  text-align: center;
-  font-family: var(--hand);
-  font-size: 5.4cqw;
-  color: #2f2118;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.card-venue {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 65%;
-  transform: translateY(-50%);
-  text-align: center;
-  font-family: var(--hand);
-  font-size: 5.4cqw;
-  color: #2f2118;
-  font-weight: 700;
-  letter-spacing: -.01em;
-  line-height: 1;
-}
-
-
-
 .parents {
   /* 부모님 성함 · 관계 · 이름을 세 칸으로 나눠 두 줄의 위치를 맞춤 */
   display: grid;
   grid-template-columns: auto auto auto;
   justify-content: center;
   align-items: baseline;
-  column-gap: 12px;
+  column-gap: 10px;
   margin: 44px 0 10px;
-  font-family: var(--hand);
-  font-size: 21px;
-  line-height: 2.1;
-  letter-spacing: 0.02em;
+  font-size: 17px;
+  line-height: 2
 }
 
 .parents span {
@@ -259,14 +203,12 @@ img {
 
 .parents em {
   font-style: normal;
-  opacity: .85;
-  text-align: left;
-  font-size: 19px;
+  opacity: .8;
+  text-align: left
 }
 
 .parents b {
-  font-size: 25px;
-  font-weight: 700;
+  font-size: 19px;
   text-align: left
 }
 
@@ -296,7 +238,7 @@ img {
   transform: translateY(-50%);
   font-family: var(--hand);
   font-weight: 700;
-  font-size: 4.8cqw;
+  font-size: 6.2cqw;
   color: #2c1a12;
   line-height: 1;
   text-align: center;
@@ -648,10 +590,9 @@ img {
   top: var(--ty, 54%);
   width: var(--tw, 64%);
   transform: translate(-50%, -50%);
-  font-family: var(--hand);
   font-weight: 700;
-  font-size: 5.6cqw;
-  line-height: 1.8;
+  font-size: 4.9cqw;
+  line-height: 1.95;
   color: #3a2a20
 }
 
@@ -661,38 +602,27 @@ img {
 }
 
 .gcard.c1 p {
-  font-size: 5.2cqw;
-  line-height: 1.85;
+  font-size: 4.4cqw
 }
 
 .gcard.c2 {
   --ty: 54%;
-  --tw: 62%
-}
-
-.gcard.c2 p {
-  font-size: 5.6cqw;
-  line-height: 1.8;
+  --tw: 60%
 }
 
 .gcard.c3 {
   --ty: 50%;
-  --tw: 64%
-}
-
-.gcard.c3 p {
-  font-size: 5.6cqw;
-  line-height: 1.8;
+  --tw: 62%
 }
 
 .gcard.c4 {
   --ty: 52%;
-  --tw: 54%;
+  --tw: 50%;
+  font-size: 1em
 }
 
 .gcard.c4 p {
-  font-size: 5.4cqw;
-  line-height: 1.8;
+  font-size: 4.5cqw
 }
 
 .nav {
@@ -876,7 +806,18 @@ footer {
 }
 
 
-
+.card-venue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 62.8%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 4.3cqw;
+  color: #2f2118;
+  font-weight: 700;
+  letter-spacing: -.01em
+}
 
 /* 갤러리 더보기 */
 .stamps:not(.open) .stamp.extra {
